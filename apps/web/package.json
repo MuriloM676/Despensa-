@@ -15,9 +15,13 @@
     "@despensa/database": "workspace:*",
     "@despensa/types": "workspace:*",
     "@despensa/ui": "workspace:*",
+    "@gsap/react": "^2.1.2",
     "bcryptjs": "catalog:",
+    "gsap": "^3.15.0",
+    "motion": "^12.43.0",
     "next": "catalog:",
     "next-auth": "catalog:",
+    "ogl": "^1.0.11",
     "react": "catalog:",
     "react-dom": "catalog:",
     "zod": "catalog:"

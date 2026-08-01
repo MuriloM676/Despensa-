@@ -1,24 +1,24 @@
 {
-  "name": "despensa-plus",
-  "private": true,
-  "packageManager": "pnpm@10.34.5",
-  "engines": {
-    "node": ">=20.9.0"
-  },
-  "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "typecheck": "turbo run typecheck",
-    "test": "turbo run test",
-    "db:migrate": "pnpm --filter @despensa/database db:migrate",
-    "db:deploy": "pnpm --filter @despensa/database db:deploy",
-    "db:generate": "pnpm --filter @despensa/database db:generate",
-    "db:seed": "pnpm --filter @despensa/database db:seed",
-    "db:studio": "pnpm --filter @despensa/database db:studio"
-  },
-  "devDependencies": {
-    "dotenv-cli": "^7.0.0",
-    "turbo": "^2.3.0"
-  }
+	"name": "despensa-plus",
+	"private": true,
+	"packageManager": "pnpm@10.34.5",
+	"engines": {
+		"node": ">=20.9.0"
+	},
+	"scripts": {
+		"build": "turbo run build",
+		"dev": "turbo run dev",
+		"lint": "turbo run lint",
+		"typecheck": "turbo run typecheck",
+		"test": "turbo run test",
+		"db:migrate": "pnpm --filter @despensa/database db:migrate",
+		"db:deploy": "pnpm --filter @despensa/database db:deploy",
+		"db:generate": "pnpm --filter @despensa/database db:generate",
+		"db:seed": "pnpm --filter @despensa/database db:seed",
+		"db:studio": "pnpm --filter @despensa/database db:studio"
+	},
+	"devDependencies": {
+		"dotenv-cli": "^7.0.0",
+		"turbo": "^2.3.0"
+	}
 }
