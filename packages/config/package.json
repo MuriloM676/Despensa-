@@ -1,0 +1,21 @@
+{
+  "name": "@despensa/config",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./tsconfig/base.json": "./tsconfig/base.json",
+    "./tsconfig/nextjs.json": "./tsconfig/nextjs.json",
+    "./eslint/base.js": "./eslint/base.js",
+    "./eslint/nextjs.js": "./eslint/nextjs.js",
+    "./prettier/index.json": "./prettier/index.json"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^10.0.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "catalog:",
+    "typescript-eslint": "^8.0.0"
+  }
+}

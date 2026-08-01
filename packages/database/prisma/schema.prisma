@@ -1,0 +1,161 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum HouseholdRole {
+  OWNER
+  MEMBER
+}
+
+model User {
+  id            String            @id @default(cuid())
+  name          String?
+  email         String            @unique
+  emailVerified DateTime?
+  passwordHash  String?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  memberships   HouseholdMember[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Household {
+  id        String            @id @default(cuid())
+  name      String
+  members   HouseholdMember[]
+  products  Product[]
+  inventory InventoryItem[]
+  lists     ShoppingList[]
+  categories ProductCategory[]
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
+
+model HouseholdMember {
+  id          String        @id @default(cuid())
+  householdId String
+  userId      String
+  role        HouseholdRole @default(MEMBER)
+  household   Household     @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
+
+  @@unique([householdId, userId])
+  @@index([userId])
+}
+
+model ProductCategory {
+  id        String    @id @default(cuid())
+  name      String
+  householdId String
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  products  Product[]
+  createdAt DateTime  @default(now())
+
+  @@unique([householdId, name])
+}
+
+model Product {
+  id           String            @id @default(cuid())
+  householdId  String
+  name         String
+  brand        String?
+  unit         String            @default("un")
+  categoryId   String?
+  household    Household         @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  category     ProductCategory?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  inventory    InventoryItem[]
+  listItems    ShoppingListItem[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@index([householdId, name])
+  @@unique([householdId, name, brand])
+}
+
+model InventoryItem {
+  id             String     @id @default(cuid())
+  householdId    String
+  productId      String
+  quantity       Int
+  purchaseDate   DateTime   @default(now())
+  expirationDate DateTime?
+  consumedAt     DateTime?
+  household      Household  @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  product        Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([householdId, consumedAt])
+  @@index([householdId, productId, consumedAt, expirationDate])
+}
+
+model ShoppingList {
+  id          String             @id @default(cuid())
+  householdId String
+  name        String
+  items       ShoppingListItem[]
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  household   Household          @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  @@index([householdId])
+}
+
+model ShoppingListItem {
+  id         String        @id @default(cuid())
+  listId     String
+  productId  String?
+  name       String
+  quantity   Int
+  done       Boolean       @default(false)
+  list       ShoppingList  @relation(fields: [listId], references: [id], onDelete: Cascade)
+  product    Product?      @relation(fields: [productId], references: [id], onDelete: SetNull)
+  createdAt  DateTime      @default(now())
+
+  @@index([listId])
+}
