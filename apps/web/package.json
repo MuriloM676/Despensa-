@@ -1,0 +1,38 @@
+{
+  "name": "@despensa/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@despensa/database": "workspace:*",
+    "@despensa/types": "workspace:*",
+    "@despensa/ui": "workspace:*",
+    "bcryptjs": "catalog:",
+    "next": "catalog:",
+    "next-auth": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@despensa/config": "workspace:*",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "autoprefixer": "^10.4.0",
+    "eslint": "^9.39.5",
+    "postcss": "^8.4.0",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

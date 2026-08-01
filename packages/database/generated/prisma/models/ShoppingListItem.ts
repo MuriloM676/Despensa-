@@ -195,7 +195,7 @@ export type ShoppingListItemGroupByOutputType = {
   id: string
   listId: string
   productId: string | null
-  name: string
+  name: string | null
   quantity: number
   done: boolean
   createdAt: Date
@@ -228,7 +228,7 @@ export type ShoppingListItemWhereInput = {
   id?: Prisma.StringFilter<"ShoppingListItem"> | string
   listId?: Prisma.StringFilter<"ShoppingListItem"> | string
   productId?: Prisma.StringNullableFilter<"ShoppingListItem"> | string | null
-  name?: Prisma.StringFilter<"ShoppingListItem"> | string
+  name?: Prisma.StringNullableFilter<"ShoppingListItem"> | string | null
   quantity?: Prisma.IntFilter<"ShoppingListItem"> | number
   done?: Prisma.BoolFilter<"ShoppingListItem"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ShoppingListItem"> | Date | string
@@ -240,7 +240,7 @@ export type ShoppingListItemOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   listId?: Prisma.SortOrder
   productId?: Prisma.SortOrderInput | Prisma.SortOrder
-  name?: Prisma.SortOrder
+  name?: Prisma.SortOrderInput | Prisma.SortOrder
   quantity?: Prisma.SortOrder
   done?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -255,7 +255,7 @@ export type ShoppingListItemWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.ShoppingListItemWhereInput | Prisma.ShoppingListItemWhereInput[]
   listId?: Prisma.StringFilter<"ShoppingListItem"> | string
   productId?: Prisma.StringNullableFilter<"ShoppingListItem"> | string | null
-  name?: Prisma.StringFilter<"ShoppingListItem"> | string
+  name?: Prisma.StringNullableFilter<"ShoppingListItem"> | string | null
   quantity?: Prisma.IntFilter<"ShoppingListItem"> | number
   done?: Prisma.BoolFilter<"ShoppingListItem"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ShoppingListItem"> | Date | string
@@ -267,7 +267,7 @@ export type ShoppingListItemOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   listId?: Prisma.SortOrder
   productId?: Prisma.SortOrderInput | Prisma.SortOrder
-  name?: Prisma.SortOrder
+  name?: Prisma.SortOrderInput | Prisma.SortOrder
   quantity?: Prisma.SortOrder
   done?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -285,7 +285,7 @@ export type ShoppingListItemScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"ShoppingListItem"> | string
   listId?: Prisma.StringWithAggregatesFilter<"ShoppingListItem"> | string
   productId?: Prisma.StringNullableWithAggregatesFilter<"ShoppingListItem"> | string | null
-  name?: Prisma.StringWithAggregatesFilter<"ShoppingListItem"> | string
+  name?: Prisma.StringNullableWithAggregatesFilter<"ShoppingListItem"> | string | null
   quantity?: Prisma.IntWithAggregatesFilter<"ShoppingListItem"> | number
   done?: Prisma.BoolWithAggregatesFilter<"ShoppingListItem"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ShoppingListItem"> | Date | string
@@ -293,7 +293,7 @@ export type ShoppingListItemScalarWhereWithAggregatesInput = {
 
 export type ShoppingListItemCreateInput = {
   id?: string
-  name: string
+  name?: string | null
   quantity: number
   done?: boolean
   createdAt?: Date | string
@@ -305,7 +305,7 @@ export type ShoppingListItemUncheckedCreateInput = {
   id?: string
   listId: string
   productId?: string | null
-  name: string
+  name?: string | null
   quantity: number
   done?: boolean
   createdAt?: Date | string
@@ -313,7 +313,7 @@ export type ShoppingListItemUncheckedCreateInput = {
 
 export type ShoppingListItemUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -325,7 +325,7 @@ export type ShoppingListItemUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   listId?: Prisma.StringFieldUpdateOperationsInput | string
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -335,7 +335,7 @@ export type ShoppingListItemCreateManyInput = {
   id?: string
   listId: string
   productId?: string | null
-  name: string
+  name?: string | null
   quantity: number
   done?: boolean
   createdAt?: Date | string
@@ -343,7 +343,7 @@ export type ShoppingListItemCreateManyInput = {
 
 export type ShoppingListItemUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -353,7 +353,7 @@ export type ShoppingListItemUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   listId?: Prisma.StringFieldUpdateOperationsInput | string
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -497,7 +497,7 @@ export type BoolFieldUpdateOperationsInput = {
 
 export type ShoppingListItemCreateWithoutProductInput = {
   id?: string
-  name: string
+  name?: string | null
   quantity: number
   done?: boolean
   createdAt?: Date | string
@@ -507,7 +507,7 @@ export type ShoppingListItemCreateWithoutProductInput = {
 export type ShoppingListItemUncheckedCreateWithoutProductInput = {
   id?: string
   listId: string
-  name: string
+  name?: string | null
   quantity: number
   done?: boolean
   createdAt?: Date | string
@@ -546,7 +546,7 @@ export type ShoppingListItemScalarWhereInput = {
   id?: Prisma.StringFilter<"ShoppingListItem"> | string
   listId?: Prisma.StringFilter<"ShoppingListItem"> | string
   productId?: Prisma.StringNullableFilter<"ShoppingListItem"> | string | null
-  name?: Prisma.StringFilter<"ShoppingListItem"> | string
+  name?: Prisma.StringNullableFilter<"ShoppingListItem"> | string | null
   quantity?: Prisma.IntFilter<"ShoppingListItem"> | number
   done?: Prisma.BoolFilter<"ShoppingListItem"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ShoppingListItem"> | Date | string
@@ -554,7 +554,7 @@ export type ShoppingListItemScalarWhereInput = {
 
 export type ShoppingListItemCreateWithoutListInput = {
   id?: string
-  name: string
+  name?: string | null
   quantity: number
   done?: boolean
   createdAt?: Date | string
@@ -564,7 +564,7 @@ export type ShoppingListItemCreateWithoutListInput = {
 export type ShoppingListItemUncheckedCreateWithoutListInput = {
   id?: string
   productId?: string | null
-  name: string
+  name?: string | null
   quantity: number
   done?: boolean
   createdAt?: Date | string
@@ -599,7 +599,7 @@ export type ShoppingListItemUpdateManyWithWhereWithoutListInput = {
 export type ShoppingListItemCreateManyProductInput = {
   id?: string
   listId: string
-  name: string
+  name?: string | null
   quantity: number
   done?: boolean
   createdAt?: Date | string
@@ -607,7 +607,7 @@ export type ShoppingListItemCreateManyProductInput = {
 
 export type ShoppingListItemUpdateWithoutProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -617,7 +617,7 @@ export type ShoppingListItemUpdateWithoutProductInput = {
 export type ShoppingListItemUncheckedUpdateWithoutProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   listId?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -626,7 +626,7 @@ export type ShoppingListItemUncheckedUpdateWithoutProductInput = {
 export type ShoppingListItemUncheckedUpdateManyWithoutProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   listId?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -635,7 +635,7 @@ export type ShoppingListItemUncheckedUpdateManyWithoutProductInput = {
 export type ShoppingListItemCreateManyListInput = {
   id?: string
   productId?: string | null
-  name: string
+  name?: string | null
   quantity: number
   done?: boolean
   createdAt?: Date | string
@@ -643,7 +643,7 @@ export type ShoppingListItemCreateManyListInput = {
 
 export type ShoppingListItemUpdateWithoutListInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -653,7 +653,7 @@ export type ShoppingListItemUpdateWithoutListInput = {
 export type ShoppingListItemUncheckedUpdateWithoutListInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -662,7 +662,7 @@ export type ShoppingListItemUncheckedUpdateWithoutListInput = {
 export type ShoppingListItemUncheckedUpdateManyWithoutListInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -740,7 +740,7 @@ export type $ShoppingListItemPayload<ExtArgs extends runtime.Types.Extensions.In
     id: string
     listId: string
     productId: string | null
-    name: string
+    name: string | null
     quantity: number
     done: boolean
     createdAt: Date

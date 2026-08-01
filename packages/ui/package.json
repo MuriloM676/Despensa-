@@ -12,7 +12,7 @@
   "scripts": {
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
     "react": "catalog:"
@@ -20,6 +20,7 @@
   "devDependencies": {
     "@despensa/config": "workspace:*",
     "@types/react": "^19.0.0",
+    "eslint": "^9.39.5",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
