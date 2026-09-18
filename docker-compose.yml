@@ -6,7 +6,11 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - .env
+      # Optional: fresh clones without a `.env` still start with the
+      # `environment` defaults below; copy `.env.example` to `.env`
+      # to override (required for a real AUTH_SECRET).
+      - path: .env
+        required: false
     environment:
       DATABASE_URL: postgresql://despensa:despensa@postgres:5432/despensa?schema=public
       REDIS_URL: redis://redis:6379
