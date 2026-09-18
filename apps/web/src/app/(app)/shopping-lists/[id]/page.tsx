@@ -5,6 +5,7 @@ import { requireHousehold } from "@/server/household";
 import { getShoppingList } from "@/server/shopping-list";
 import { listProducts } from "@/server/product";
 import { ShoppingListItemForm } from "@/components/shopping-list-item-form";
+import { PurchaseToStockForm } from "@/components/purchase-to-stock-form";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import {
   toggleShoppingListItemAction,
@@ -101,28 +102,34 @@ export default async function ShoppingListDetailPage({
               <h2 className="mb-2 text-sm font-semibold text-slate-900">Comprados</h2>
               <ul className="divide-y divide-slate-100">
                 {doneItems.map((item) => (
-                  <li key={item.id} className="flex items-center gap-3 py-3">
-                    <form action={toggleShoppingListItemAction}>
-                      <input type="hidden" name="itemId" value={item.id} />
-                      <input type="hidden" name="listId" value={list.id} />
-                      <input type="hidden" name="done" value="false" />
-                      <button
-                        type="submit"
-                        className="flex h-5 w-5 items-center justify-center rounded border border-emerald-500 bg-emerald-500 text-white"
-                        aria-label={`Desmarcar ${item.product?.name ?? item.name}`}
-                      >
-                        <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
-                          <path
-                            fillRule="evenodd"
-                            d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0l-3.5-3.5a1 1 0 1 1 1.4-1.4l2.8 2.79 6.8-6.79a1 1 0 0 1 1.4 0Z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </button>
+                  <li key={item.id} className="py-3">
+                    <div className="flex items-center gap-3">
+                      <form action={toggleShoppingListItemAction}>
+                        <input type="hidden" name="itemId" value={item.id} />
+                        <input type="hidden" name="listId" value={list.id} />
+                        <input type="hidden" name="done" value="false" />
+                        <button
+                          type="submit"
+                          className="flex h-5 w-5 items-center justify-center rounded border border-emerald-500 bg-emerald-500 text-white"
+                          aria-label={`Desmarcar ${item.product?.name ?? item.name}`}
+                        >
+                          <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
+                            <path
+                              fillRule="evenodd"
+                              d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0l-3.5-3.5a1 1 0 1 1 1.4-1.4l2.8 2.79 6.8-6.79a1 1 0 0 1 1.4 0Z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                      </form>
                       <p className="text-sm text-slate-500 line-through">
                         {item.product?.name ?? item.name}
                       </p>
-                    </form>
+                      <p className="text-xs text-slate-400">
+                        {item.quantity} {item.product?.unit ?? "un"}
+                      </p>
+                    </div>
+                    <PurchaseToStockForm itemId={item.id} listId={list.id} />
                   </li>
                 ))}
               </ul>
