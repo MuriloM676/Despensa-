@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { createProductSchema, deleteProductSchema } from "./product";
+import {
+  createCategorySchema,
+  createProductSchema,
+  deleteCategorySchema,
+  deleteProductSchema,
+  updateProductSchema,
+} from "./product";
 
 describe("createProductSchema", () => {
   it("requires a name", () => {
@@ -31,5 +37,43 @@ describe("deleteProductSchema", () => {
   it("requires a productId (B5)", () => {
     expect(deleteProductSchema.safeParse({ productId: "" }).success).toBe(false);
     expect(deleteProductSchema.safeParse({ productId: "p1" }).success).toBe(true);
+  });
+});
+
+describe("updateProductSchema (B15)", () => {
+  it("requires a productId plus the product fields", () => {
+    expect(updateProductSchema.safeParse({ name: "Café" }).success).toBe(false);
+    expect(
+      updateProductSchema.safeParse({ productId: "p1", name: "Café", unit: "g" }).success,
+    ).toBe(true);
+  });
+
+  it("applies the same field rules as creation (BR-010)", () => {
+    expect(
+      updateProductSchema.safeParse({ productId: "p1", name: "", unit: "g" }).success,
+    ).toBe(false);
+    expect(
+      updateProductSchema.safeParse({ productId: "p1", name: "Café", unit: "" }).success,
+    ).toBe(false);
+  });
+});
+
+describe("createCategorySchema (B15)", () => {
+  it("requires a trimmed name up to 120 chars (BR-011)", () => {
+    expect(createCategorySchema.safeParse({ name: "" }).success).toBe(false);
+    expect(createCategorySchema.safeParse({ name: "  " }).success).toBe(false);
+    expect(createCategorySchema.safeParse({ name: "x".repeat(121) }).success).toBe(false);
+    const result = createCategorySchema.safeParse({ name: "  Laticínios  " });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.name).toBe("Laticínios");
+    }
+  });
+});
+
+describe("deleteCategorySchema (B15)", () => {
+  it("requires a categoryId", () => {
+    expect(deleteCategorySchema.safeParse({ categoryId: "" }).success).toBe(false);
+    expect(deleteCategorySchema.safeParse({ categoryId: "c1" }).success).toBe(true);
   });
 });
