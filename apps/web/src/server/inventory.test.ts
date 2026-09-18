@@ -12,7 +12,8 @@ vi.mock("@despensa/database", () => ({
     product: {
       findFirst: vi.fn(),
     },
-    $transaction: vi.fn((ops: unknown) => Promise.resolve(ops)),
+    $executeRaw: vi.fn(),
+    $transaction: vi.fn(),
   },
 }));
 
@@ -36,6 +37,13 @@ function mockStock(entries: StockEntry[]): void {
     entries as unknown as FindManyResult,
   );
 }
+
+// The tx client exposes the same surface in tests, so reads, locks and
+// writes can be asserted on the shared mock.
+vi.mocked(prisma.$executeRaw).mockResolvedValue(0);
+vi.mocked(prisma.$transaction).mockImplementation(
+  ((callback: (tx: typeof prisma) => Promise<unknown>) => callback(prisma)) as unknown as typeof prisma.$transaction,
+);
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -109,6 +117,40 @@ describe("consumeInventory", () => {
         orderBy: { expirationDate: { sort: "asc", nulls: "last" } },
       }),
     );
+  });
+
+  it("locks rows before reading inside a serializable transaction (B9)", async () => {
+    mockStock([stockEntry("a", 3, "2026-08-10")]);
+
+    await consumeInventory("household-1", { productId: "product-1", quantity: 1 });
+
+    const txCalls = vi.mocked(prisma.$transaction).mock
+      .calls as unknown as Array<[callback: unknown, options: unknown]>;
+    const firstTxCall = txCalls[0];
+    if (!firstTxCall) {
+      throw new Error("expected $transaction to be called");
+    }
+    const [callback, options] = firstTxCall;
+    expect(typeof callback).toBe("function");
+    expect(options).toMatchObject({ isolationLevel: "Serializable" });
+
+    expect(prisma.$executeRaw).toHaveBeenCalledTimes(1);
+    const rawCalls = vi.mocked(prisma.$executeRaw).mock.calls as unknown as unknown[][];
+    const firstRawCall = rawCalls[0];
+    if (!firstRawCall) {
+      throw new Error("expected $executeRaw to be called");
+    }
+    const [template] = firstRawCall;
+    const sql = (template as unknown as string[]).join("");
+    expect(sql).toContain("FOR UPDATE");
+    expect(sql).toContain('"InventoryItem"');
+
+    const rawOrder = vi.mocked(prisma.$executeRaw).mock.invocationCallOrder[0];
+    const findOrder = vi.mocked(prisma.inventoryItem.findMany).mock.invocationCallOrder[0];
+    if (rawOrder === undefined || findOrder === undefined) {
+      throw new Error("expected lock and read to be recorded");
+    }
+    expect(rawOrder).toBeLessThan(findOrder);
   });
 });
 

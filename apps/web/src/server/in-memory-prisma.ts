@@ -11,6 +11,13 @@
  * cascading deletes from lists/products, and `$transaction` over a batch of
  * writes. Anything it does not implement throws, so silent drift fails loud.
  *
+ * B9: `$transaction` also supports the interactive (callback) form. Callback
+ * transactions run strictly one at a time (a promise-chain mutex), mirroring
+ * the Serializable + `SELECT ... FOR UPDATE` guarantee `consumeInventory`
+ * relies on in Postgres. The batch (array) form keeps the old parallel
+ * behavior, so the pre-B9 read-outside/write-inside pattern still oversells
+ * in tests and the B9 concurrency test stays red without the fix.
+ *
  * Used only from `*.integration.test.ts` via `vi.mock("@despensa/database")`.
  * Never imported by production code.
  */
@@ -137,6 +144,7 @@ export interface TestPrisma {
     findFirst(args: { where: LooseRecord }): Promise<TestCategory | null>;
     findMany(args: { where?: LooseRecord; orderBy?: unknown }): Promise<TestCategory[]>;
     create(args: { data: LooseRecord }): Promise<TestCategory>;
+    deleteMany(args: { where: LooseRecord }): Promise<{ count: number }>;
   };
   product: {
     findFirst(args: { where: LooseRecord }): Promise<TestProduct | null>;
@@ -146,6 +154,7 @@ export interface TestPrisma {
       orderBy?: unknown;
     }): Promise<unknown[]>;
     create(args: { data: LooseRecord }): Promise<TestProduct>;
+    update(args: { where: LooseRecord; data: LooseRecord }): Promise<TestProduct>;
     deleteMany(args: { where: LooseRecord }): Promise<{ count: number }>;
   };
   inventoryItem: {
@@ -173,6 +182,12 @@ export interface TestPrisma {
     delete(args: { where: LooseRecord }): Promise<TestShoppingListItem>;
   };
   $transaction(ops: Promise<unknown>[]): Promise<unknown[]>;
+  $transaction<T>(
+    fn: (tx: TestPrisma) => Promise<T>,
+    options?: { isolationLevel?: string; maxWait?: number; timeout?: number },
+  ): Promise<T>;
+  $executeRaw(query: TemplateStringsArray, ...values: unknown[]): Promise<number>;
+  $queryRaw(query: TemplateStringsArray, ...values: unknown[]): Promise<unknown[]>;
 }
 
 export interface InMemoryDb {
@@ -229,6 +244,19 @@ export function createInMemoryPrisma(): InMemoryDb {
     return `${prefix}-test-${seq}`;
   };
 
+  // B9: serializes interactive (callback) transactions, mirroring the
+  // Serializable + row-lock guarantee the services rely on in Postgres.
+  let txTail: Promise<unknown> = Promise.resolve();
+
+  function runSerialized<T>(fn: () => Promise<T>): Promise<T> {
+    const run = txTail.then(fn, fn);
+    txTail = run.then(
+      () => undefined,
+      () => undefined,
+    );
+    return run;
+  }
+
   const db: InMemoryDb = {
     users: new Map(),
     households: new Map(),
@@ -251,6 +279,7 @@ export function createInMemoryPrisma(): InMemoryDb {
       db.lists.clear();
       db.listItems.clear();
       db.failNextProductCreateWithP2002 = false;
+      txTail = Promise.resolve();
       seq = 0;
     },
   };
@@ -403,6 +432,19 @@ export function createInMemoryPrisma(): InMemoryDb {
         db.categories.set(category.id, category);
         return category;
       },
+      deleteMany: async (args: { where: LooseRecord }): Promise<{ count: number }> => {
+        let count = 0;
+        for (const category of [...db.categories.values()]) {
+          if (!matchesWhere(category as unknown as LooseRecord, args.where)) continue;
+          db.categories.delete(category.id);
+          // Mirrors ON DELETE SET NULL: products keep their row, link cleared.
+          for (const product of db.products.values()) {
+            if (product.categoryId === category.id) product.categoryId = null;
+          }
+          count += 1;
+        }
+        return { count };
+      },
     },
     product: {
       findFirst: async (args: { where: LooseRecord }): Promise<TestProduct | null> => {
@@ -472,6 +514,21 @@ export function createInMemoryPrisma(): InMemoryDb {
           count += 1;
         }
         return { count };
+      },
+      update: async (args: {
+        where: LooseRecord;
+        data: LooseRecord;
+      }): Promise<TestProduct> => {
+        const product = db.products.get(String(args.where.id));
+        if (!product) throw new Error("Produto não encontrado");
+        if ("name" in args.data) product.name = String(args.data.name);
+        if ("brand" in args.data) product.brand = (args.data.brand as string | null) ?? null;
+        if ("unit" in args.data) product.unit = String(args.data.unit);
+        if ("categoryId" in args.data) {
+          product.categoryId = (args.data.categoryId as string | null) ?? null;
+        }
+        product.updatedAt = new Date();
+        return product;
       },
     },
     inventoryItem: {
@@ -648,7 +705,14 @@ export function createInMemoryPrisma(): InMemoryDb {
         return item;
       },
     },
-    $transaction: async (ops: Promise<unknown>[]): Promise<unknown[]> => Promise.all(ops),
+    $transaction: ((arg: Promise<unknown>[] | ((tx: TestPrisma) => Promise<unknown>)) => {
+      if (typeof arg === "function") {
+        return runSerialized(() => arg(db.prisma));
+      }
+      return Promise.all(arg);
+    }) as TestPrisma["$transaction"],
+    $executeRaw: () => Promise.resolve(0),
+    $queryRaw: () => Promise.resolve([]),
   };
 
   return db;

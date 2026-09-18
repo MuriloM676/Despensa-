@@ -40,6 +40,13 @@ their category when set.
 
 **FR-004** The user must be able to view all categories of their household.
 
+**FR-005** The user must be able to update (rename) a product of their
+household: name, brand, unit and category.
+
+**FR-006** The user must be able to create a category in their household.
+
+**FR-007** The user must be able to delete a category of their household.
+
 ## Business Rules
 
 **BR-001** A product belongs to exactly one household. Only members of the
@@ -70,6 +77,19 @@ unique (exact match on the trimmed value).
 product are deleted with it (`CASCADE`), while shopping list items keep their
 row and lose the product link (`SET NULL`, custom name preserved).
 
+**BR-009** The delete confirmation must warn about history loss: it states
+how many inventory records will be deleted with the product, and that
+shopping list items keep their name without the product link.
+
+**BR-010** Updating a product follows the same rules as creation (BR-002 to
+BR-006): name, brand, unit and category validation, same-household category
+check, and `(name, brand)` uniqueness against every other product of the
+household (the product itself excluded).
+
+**BR-011** Category name is required, trimmed, 1–120 characters, unique
+within the household (exact match, BR-007). Deleting a category never deletes
+products; their category link is cleared (`SET NULL`).
+
 ## Acceptance Criteria
 
 **AC-001** Given a household with product "Milk" (no brand), when the user
@@ -84,6 +104,23 @@ unit is `"un"`.
 
 **AC-004** Given categories of another household, when the user creates a
 product referencing one of them, then the operation is rejected.
+
+**AC-005** Given a product "Milk" (brand "A"), when the user renames it to
+"Coffee" (brand "B"), then the product is updated; when the new name/brand
+matches another product of the household, then the update is rejected with a
+duplicate error.
+
+**AC-006** Given a household without category "Dairy", when the user creates
+it, then it appears in the category list; creating "Dairy" again is rejected
+with a duplicate error.
+
+**AC-007** Given a product with 2 inventory records, when the user deletes
+it, then the confirmation warns that 2 stock records will be deleted, and
+after confirming the product and its inventory records are gone while
+shopping list items keep their name without the product link.
+
+**AC-008** Given a category with products, when the user deletes the
+category, then the products remain, uncategorized.
 
 ## Out of scope (later)
 

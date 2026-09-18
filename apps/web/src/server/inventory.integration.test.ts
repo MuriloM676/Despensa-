@@ -215,6 +215,35 @@ describe("inventory integration (B11, in-memory Prisma)", () => {
     );
   });
 
+  it("serializes concurrent consumes so stock never goes negative (AC-008, B9)", async () => {
+    const productId = await seedProduct();
+    await addInventoryItem(HOUSEHOLD, {
+      productId,
+      quantity: 3,
+      purchaseDate: undefined,
+      expirationDate: undefined,
+    });
+
+    const results = await Promise.allSettled([
+      consumeInventory(HOUSEHOLD, { productId, quantity: 2 }),
+      consumeInventory(HOUSEHOLD, { productId, quantity: 2 }),
+    ]);
+
+    const fulfilled = results.filter((r) => r.status === "fulfilled");
+    const rejected = results.filter((r) => r.status === "rejected");
+    expect(fulfilled).toHaveLength(1);
+    expect(rejected).toHaveLength(1);
+    const loser = rejected[0];
+    if (!loser || loser.status !== "rejected") {
+      throw new Error("expected one consume to be rejected");
+    }
+    expect(loser.reason).toBeInstanceOf(InsufficientStockError);
+
+    const remaining = await stocked();
+    const total = remaining.reduce((sum, r) => sum + r.quantity, 0);
+    expect(total).toBe(1);
+  });
+
   it("counts distinct stocked products for the dashboard (B13)", () => {
     expect(
       countStockedProducts([

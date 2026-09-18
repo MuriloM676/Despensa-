@@ -1,15 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import type { CSSProperties } from "react";
 import Link from "next/link";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 import Aurora from "@/components/reactbits/aurora";
 import SplitText from "@/components/reactbits/split-text";
 import { ArrowRightIcon, ClockIcon } from "@/components/icons";
-
-gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 interface LandingHeroProps {
   userLoggedIn: boolean;
@@ -26,82 +22,44 @@ export function LandingHero({ userLoggedIn }: LandingHeroProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const shelfRef = useRef<HTMLDivElement>(null);
 
-  useGSAP(
-    () => {
-      const ctx = gsap.context(() => {
-        gsap.fromTo(
-          "[data-hero-fade]",
-          { y: 24, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.9, ease: "power3.out", stagger: 0.12, delay: 0.3 }
-        );
-
-        gsap.fromTo(
-          ".shelf-jar",
-          { y: 80, opacity: 0, rotate: 6 },
-          {
-            y: 0,
-            opacity: 1,
-            rotate: 0,
-            duration: 1,
-            ease: "back.out(1.6)",
-            stagger: 0.16,
-            delay: 1.1,
-          }
-        );
-
-        gsap.to(".expiry-seal", {
-          rotate: 360,
-          duration: 6,
-          ease: "power1.inOut",
-          repeat: -1,
-          yoyo: true,
-          delay: 2.4,
-        });
-
-        gsap.fromTo(
-          ".expiry-pulse",
-          { scale: 1, opacity: 0.9 },
-          { scale: 1.6, opacity: 0, duration: 2, ease: "power1.out", repeat: -1, delay: 2.4 }
-        );
-
-        const shelf = shelfRef.current;
-        if (shelf) {
-          gsap.to(shelf, {
-            y: -18,
-            ease: "none",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top top",
-              end: "bottom top",
-              scrub: 1,
-            },
-          });
-        }
-      }, sectionRef);
-      return () => ctx.revert();
-    },
-    { scope: sectionRef }
-  );
-
+  // Gentle parallax on the shelf while scrolling the hero out of view
+  // (M13: tiny scroll listener replacing the gsap scrub tween).
   useEffect(() => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) {
-      gsap.globalTimeline.timeScale(0);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
     }
+    let frame = 0;
+    function onScroll(): void {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const shelf = shelfRef.current;
+        const section = sectionRef.current;
+        if (!shelf || !section) {
+          return;
+        }
+        const progress = Math.min(Math.max(-section.getBoundingClientRect().top / 600, 0), 1);
+        shelf.style.transform = `translateY(${-18 * progress}px)`;
+      });
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
   return (
     <section ref={sectionRef} id="top" className="relative overflow-hidden bg-ink text-paper">
       <div className="absolute inset-0 opacity-60">
-        <Aurora colorStops={["#10241B", "#D9482E", "#E5A93B"]} amplitude={1.1} blend={0.6} speed={0.9} />
+        <Aurora colorStops={["#10241B", "#D9482E", "#E5A93B"]} speed={0.9} />
       </div>
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/30 via-transparent to-ink" />
 
       <div className="relative mx-auto flex max-w-6xl flex-col px-6 pb-24 pt-36 md:pt-44">
         <div className="max-w-3xl">
           <p
-            data-hero-fade
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-paper/20 bg-paper/5 px-4 py-1.5 font-mono text-xs uppercase tracking-widest text-mustard"
+            className="hero-fade mb-6 inline-flex items-center gap-2 rounded-full border border-paper/20 bg-paper/5 px-4 py-1.5 font-mono text-xs uppercase tracking-widest text-mustard"
+            style={{ "--hero-delay": "0.3s" } as CSSProperties}
           >
             <ClockIcon className="h-3.5 w-3.5" />
             Nada vence. Nada falta.
@@ -111,7 +69,7 @@ export function LandingHero({ userLoggedIn }: LandingHeroProps) {
             text="Sua despensa sempre sob controle"
             tag="h1"
             textAlign="left"
-            splitType="lines"
+            splitType="words"
             delay={40}
             duration={1.1}
             threshold={1}
@@ -119,12 +77,18 @@ export function LandingHero({ userLoggedIn }: LandingHeroProps) {
             className="font-display text-5xl font-extrabold leading-[1.02] tracking-tight md:text-7xl"
           />
 
-          <p data-hero-fade className="mt-6 max-w-xl text-lg leading-relaxed text-paper/70">
+          <p
+            className="hero-fade mt-6 max-w-xl text-lg leading-relaxed text-paper/70"
+            style={{ "--hero-delay": "0.42s" } as CSSProperties}
+          >
             O Despensa+ acompanha o que você tem, quando vence e o que falta comprar.
             Consuma primeiro o que vai vencer — e pare de jogar comida fora.
           </p>
 
-          <div data-hero-fade className="mt-10 flex flex-wrap items-center gap-4">
+          <div
+            className="hero-fade mt-10 flex flex-wrap items-center gap-4"
+            style={{ "--hero-delay": "0.54s" } as CSSProperties}
+          >
             <Link
               href={userLoggedIn ? "/dashboard" : "/register"}
               className="group inline-flex items-center gap-2 rounded-full bg-tomato px-7 py-3.5 text-base font-bold text-white shadow-xl shadow-tomato/30 transition-all hover:-translate-y-0.5 hover:bg-tomato/90"
@@ -146,14 +110,21 @@ export function LandingHero({ userLoggedIn }: LandingHeroProps) {
             {shelfItems.map((item, i) => (
               <div
                 key={item.name}
-                className={`shelf-jar relative flex flex-1 flex-col items-center rounded-t-2xl border px-2 pb-4 pt-6 shadow-xl md:px-4 md:pt-10 ${item.color} ${
+                className={`shelf-jar-animated relative flex flex-1 flex-col items-center rounded-t-2xl border px-2 pb-4 pt-6 shadow-xl md:px-4 md:pt-10 ${item.color} ${
                   i === 0 ? "h-36 md:h-44" : i === 3 ? "h-28 md:h-36" : "h-32 md:h-40"
                 }`}
+                style={{ "--shelf-delay": `${1.1 + i * 0.16}s` } as CSSProperties}
               >
                 {i === 3 && (
                   <div className="absolute -top-3 right-1/2 translate-x-1/2 md:-top-4">
-                    <div className="expiry-pulse absolute inset-0 rounded-full bg-tomato/50" />
-                    <div className="expiry-seal relative grid h-12 w-12 place-items-center rounded-full bg-tomato text-center font-mono text-[8px] font-bold leading-tight text-white md:h-16 md:w-16 md:text-[10px]">
+                    <div
+                      className="expiry-pulse-animated absolute inset-0 rounded-full bg-tomato/50"
+                      style={{ "--seal-delay": "2.4s" } as CSSProperties}
+                    />
+                    <div
+                      className="expiry-seal-animated relative grid h-12 w-12 place-items-center rounded-full bg-tomato text-center font-mono text-[8px] font-bold leading-tight text-white md:h-16 md:w-16 md:text-[10px]"
+                      style={{ "--seal-delay": "2.4s" } as CSSProperties}
+                    >
                       VENCE<br />HOJE
                     </div>
                   </div>

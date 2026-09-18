@@ -1,13 +1,8 @@
 "use client";
 
-import { useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 import CountUp from "@/components/reactbits/count-up";
+import { Reveal } from "@/components/landing/reveal";
 import { CheckIcon } from "@/components/icons";
-
-gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const stats = [
   { value: 40, suffix: "%", label: "menos comida desperdiçada" },
@@ -16,30 +11,10 @@ const stats = [
 ];
 
 export function LandingFefo() {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useGSAP(
-    () => {
-      gsap.fromTo(
-        "[data-stagger]",
-        { y: 40, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          ease: "power3.out",
-          stagger: 0.15,
-          scrollTrigger: { trigger: sectionRef.current, start: "top 75%", once: true },
-        }
-      );
-    },
-    { scope: sectionRef }
-  );
-
   return (
-    <section ref={sectionRef} className="border-y border-ink/10 bg-cream">
+    <section className="border-y border-ink/10 bg-cream">
       <div className="mx-auto grid max-w-6xl gap-12 px-6 py-24 lg:grid-cols-2">
-        <div>
+        <Reveal>
           <p className="mb-3 font-mono text-xs uppercase tracking-widest text-tomato">A regra FEFO</p>
           <h2 className="font-display text-4xl font-extrabold leading-tight tracking-tight md:text-5xl">
             Na sua despensa,
@@ -65,21 +40,19 @@ export function LandingFefo() {
               </li>
             ))}
           </ul>
-        </div>
+        </Reveal>
 
         <div className="grid content-center gap-6">
           {stats.map((stat, i) => (
-            <div
-              key={stat.label}
-              data-stagger={i}
-              className="rounded-3xl border border-ink/10 bg-paper p-8 shadow-sm"
-            >
-              <p className="font-display text-6xl font-extrabold tracking-tight text-ink md:text-7xl">
-                <CountUp to={stat.value} duration={2} separator="." />
-                <span className="text-tomato">{stat.suffix}</span>
-              </p>
-              <p className="mt-2 text-ink/60">{stat.label}</p>
-            </div>
+            <Reveal key={stat.label} delay={i * 0.15}>
+              <div className="rounded-3xl border border-ink/10 bg-paper p-8 shadow-sm">
+                <p className="font-display text-6xl font-extrabold tracking-tight text-ink md:text-7xl">
+                  <CountUp to={stat.value} duration={2} separator="." />
+                  <span className="text-tomato">{stat.suffix}</span>
+                </p>
+                <p className="mt-2 text-ink/60">{stat.label}</p>
+              </div>
+            </Reveal>
           ))}
         </div>
       </div>
