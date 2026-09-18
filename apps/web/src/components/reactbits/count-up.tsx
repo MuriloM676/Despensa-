@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
-import { useInView, useMotionValue, useSpring } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 
 interface CountUpProps {
   to: number;
@@ -14,6 +13,18 @@ interface CountUpProps {
   onEnd?: () => void;
 }
 
+function decimalPlaces(value: number): number {
+  const text = value.toString();
+  if (text.includes(".")) {
+    const decimals = text.split(".")[1] ?? "";
+    if (Number.parseInt(decimals) !== 0) {
+      return decimals.length;
+    }
+  }
+  return 0;
+}
+
+/** Animated number counter (M13: rAF replacement for the motion/react spring). */
 export default function CountUp({
   to,
   from = 0,
@@ -27,89 +38,108 @@ export default function CountUp({
   onEnd,
 }: CountUpProps) {
   const ref = useRef<HTMLSpanElement>(null);
-  const motionValue = useMotionValue(direction === "down" ? to : from);
+  const callbacks = useRef({ onStart, onEnd });
+  callbacks.current = { onStart, onEnd };
 
-  const damping = 20 + 40 * (1 / duration);
-  const stiffness = 100 * (1 / duration);
+  const maxDecimals = Math.max(decimalPlaces(from), decimalPlaces(to));
+  const startValue = direction === "down" ? to : from;
+  const endValue = direction === "down" ? from : to;
 
-  const springValue = useSpring(motionValue, {
-    damping,
-    stiffness,
-  });
+  function formatValue(latest: number): string {
+    const hasDecimals = maxDecimals > 0;
+    const formatted = Intl.NumberFormat("pt-BR", {
+      useGrouping: Boolean(separator),
+      minimumFractionDigits: hasDecimals ? maxDecimals : 0,
+      maximumFractionDigits: hasDecimals ? maxDecimals : 0,
+    }).format(latest);
+    return separator ? formatted.replace(/\./g, separator) : formatted;
+  }
 
-  const isInView = useInView(ref, { once: true, margin: "0px" });
-
-  const getDecimalPlaces = (num: number): number => {
-    const str = num.toString();
-    if (str.includes(".")) {
-      const decimals = str.split(".")[1] ?? "";
-      if (parseInt(decimals) !== 0) {
-        return decimals.length;
-      }
-    }
-    return 0;
-  };
-
-  const maxDecimals = Math.max(getDecimalPlaces(from), getDecimalPlaces(to));
-
-  const formatValue = useCallback(
-    (latest: number): string => {
-      const hasDecimals = maxDecimals > 0;
-
-      const options: Intl.NumberFormatOptions = {
-        useGrouping: !!separator,
-        minimumFractionDigits: hasDecimals ? maxDecimals : 0,
-        maximumFractionDigits: hasDecimals ? maxDecimals : 0,
-      };
-
-      const formattedNumber = Intl.NumberFormat("pt-BR", options).format(latest);
-
-      return separator ? formattedNumber.replace(/\./g, separator) : formattedNumber;
-    },
-    [maxDecimals, separator]
-  );
+  const [text, setText] = useState(() => formatValue(startValue));
 
   useEffect(() => {
-    if (ref.current) {
-      ref.current.textContent = formatValue(direction === "down" ? to : from);
-    }
-  }, [from, to, direction, formatValue]);
+    setText(formatValue(startValue));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [from, to, direction]);
 
   useEffect(() => {
-    if (isInView && startWhen) {
-      if (typeof onStart === "function") {
-        onStart();
+    const element = ref.current;
+    if (!element || !startWhen) {
+      return;
+    }
+
+    let frame = 0;
+    let startTimeout = 0;
+    let endTimeout = 0;
+    let stopped = false;
+
+    function tick(startTime: number): void {
+      if (stopped) {
+        return;
       }
+      const elapsed = (performance.now() - startTime) / 1000;
+      const progress = Math.min(elapsed / Math.max(duration, 0.01), 1);
+      const eased = 1 - Math.pow(2, -10 * progress);
+      const settled = progress === 1 ? 1 : eased;
+      setText(formatValue(startValue + (endValue - startValue) * settled));
+      if (progress < 1) {
+        frame = requestAnimationFrame(() => {
+          tick(startTime);
+        });
+      }
+    }
 
-      const timeoutId = setTimeout(() => {
-        motionValue.set(direction === "down" ? from : to);
-      }, delay * 1000);
-
-      const durationTimeoutId = setTimeout(
+    function begin(): void {
+      callbacks.current.onStart?.();
+      startTimeout = window.setTimeout(
         () => {
-          if (typeof onEnd === "function") {
-            onEnd();
+          tick(performance.now());
+        },
+        delay * 1000,
+      );
+      endTimeout = window.setTimeout(
+        () => {
+          callbacks.current.onEnd?.();
+        },
+        delay * 1000 + duration * 1000,
+      );
+    }
+
+    if (typeof IntersectionObserver === "undefined") {
+      begin();
+    } else {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (entry?.isIntersecting) {
+            observer.disconnect();
+            begin();
           }
         },
-        delay * 1000 + duration * 1000
+        { threshold: 0 },
       );
-
+      observer.observe(element);
       return () => {
-        clearTimeout(timeoutId);
-        clearTimeout(durationTimeoutId);
+        stopped = true;
+        observer.disconnect();
+        window.clearTimeout(startTimeout);
+        window.clearTimeout(endTimeout);
+        cancelAnimationFrame(frame);
       };
     }
-  }, [isInView, startWhen, motionValue, direction, from, to, delay, onStart, onEnd, duration]);
 
-  useEffect(() => {
-    const unsubscribe = springValue.on("change", (latest: number) => {
-      if (ref.current) {
-        ref.current.textContent = formatValue(latest);
-      }
-    });
+    return () => {
+      stopped = true;
+      window.clearTimeout(startTimeout);
+      window.clearTimeout(endTimeout);
+      cancelAnimationFrame(frame);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startWhen, delay, duration, from, to, direction]);
 
-    return () => unsubscribe();
-  }, [springValue, formatValue]);
-
-  return <span className={className} ref={ref} />;
+  return (
+    <span className={className} ref={ref}>
+      {text}
+    </span>
+  );
 }

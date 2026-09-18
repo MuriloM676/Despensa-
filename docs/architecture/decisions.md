@@ -136,3 +136,38 @@ adding it later does not change the dev setup.
 
 - `docker compose up` starts postgres + redis regardless of use.
 - No production code depends on Redis until a feature actually needs it.
+
+---
+
+## ADR-007: Landing without animation dependencies
+
+**Status:** Accepted
+
+### Decision
+
+Remove the landing-page animation dependencies (`gsap`, `@gsap/react`,
+`motion`, `ogl`) and reproduce their effects with CSS keyframes plus tiny
+vanilla hooks (`IntersectionObserver` reveals, `requestAnimationFrame`
+counter and parallax, layered-gradient aurora).
+
+### Reason
+
+The four packages were used only by the public landing page, for effects
+that do not need libraries: fade/slide entrances, a number counter, and an
+animated gradient wash. Measured cost before removal: `gsap` core 175 kB
+raw / 42 kB gzip, `ScrollTrigger` 113 kB / 26 kB, `SplitText` 18 kB / 5 kB
+(dist files, before the transitive `motion-dom`/`ogl` weight). A production
+build totaled 918 kB of client JS chunks; after removal it is 726 kB
+(-192 kB raw, -21%, one chunk fewer) with the same routes and visuals.
+Keeping them violated the "no unnecessary dependencies" rule for a
+marginal visual difference.
+
+### Consequences
+
+- `apps/web/package.json` no longer lists animation dependencies.
+- Landing motion lives in `apps/web/src/app/globals.css` (keyframes) and
+  small components (`landing/reveal.tsx`, dependency-free `reactbits/*`).
+- `SplitText` splits words instead of measured lines (no layout engine);
+  all motion honors `prefers-reduced-motion`.
+- If the landing ever needs physics-based or scroll-scrubbed storytelling
+  again, re-evaluate then - do not preemptively re-add.
