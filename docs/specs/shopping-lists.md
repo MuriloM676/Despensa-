@@ -34,6 +34,10 @@ and a quantity.
 
 **FR-008** The user must be able to view the details of a single list.
 
+**FR-009** The user must be able to convert a purchased (done) shopping-list
+item into an inventory entry (product, quantity, optional expiration date),
+following the simple manual flow (human decision option 1, card desp-vision).
+
 ## Business Rules
 
 **BR-001** A shopping list belongs to exactly one household.
@@ -47,6 +51,29 @@ and a quantity.
 **BR-005** An item may carry both a product link and a custom name; the name
 is stored as given and never silently discarded.
 
+**BR-006** Only items marked done (purchased) can be converted into stock.
+Converting a pending item is rejected.
+
+**BR-007** Conversion resolves the product as follows: when the item links to
+an existing product, that product is reused; otherwise a product is created
+from the item name (unit defaults to `un`), reusing an existing
+same-household product with the same name when one exists.
+
+**BR-008** Conversion creates exactly one inventory entry with the item
+quantity and the optional expiration date given at conversion time. Purchase
+date defaults to the current date. The shopping-list item itself is kept
+(unchanged, still done); items are never merged.
+
+## Purchase-to-stock flow (simple manual version)
+
+1. The user marks a shopping-list item as done (purchased).
+2. Next to each done item, the UI offers "Move to stock" with an optional
+   expiration date field.
+3. On submit, the server validates the item (exists, belongs to the user's
+   household, is done), resolves the product per BR-007, and creates the
+   inventory entry per BR-008.
+4. The user sees the new entry in the inventory; the list item stays done.
+
 ## Acceptance Criteria
 
 **AC-001** Given a user in a household, when the user creates a list named
@@ -59,8 +86,20 @@ merged in MVP 1).
 **AC-003** Given an item linked to a product, when the list is displayed, then
 the product name is shown.
 
+**AC-004** Given a done item linked to a product with quantity 2, when the
+user converts it into stock, then one inventory entry of quantity 2 is created
+for that product and the list item stays done.
+
+**AC-005** Given a done item with only a custom name, when the user converts
+it into stock, then a product with that name is created (or reused when it
+already exists) and one inventory entry is created for it.
+
+**AC-006** Given a pending (not done) item, when the user tries to convert it
+into stock, then the operation is rejected with an error.
+
 ## Out of scope (later)
 
 - Converting purchased items into stock entries automatically.
+- Bulk conversion of a whole list at once.
 - Sorting by category in the store.
 - Sharing lists across households.
