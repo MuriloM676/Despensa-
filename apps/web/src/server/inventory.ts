@@ -7,11 +7,15 @@ export function listInventory(householdId: string) {
     where: {
       householdId,
       consumedAt: null,
+      quantity: { gt: 0 },
     },
     include: {
       product: { include: { category: true } },
     },
-    orderBy: [{ product: { name: "asc" } }, { expirationDate: "asc" }],
+    orderBy: [
+      { product: { name: "asc" } },
+      { expirationDate: { sort: "asc", nulls: "last" } },
+    ],
   });
 }
 
@@ -43,19 +47,22 @@ export async function consumeInventory(householdId: string, input: ConsumeInvent
       consumedAt: null,
       quantity: { gt: 0 },
     },
-    orderBy: { expirationDate: "asc" },
+    orderBy: { expirationDate: { sort: "asc", nulls: "last" } },
   });
 
   const plan = planFefoConsumption(entries, input.quantity);
+  const quantityById = new Map(entries.map((entry) => [entry.id, entry.quantity]));
 
   await prisma.$transaction(
     plan.map((step) =>
-      prisma.inventoryItem.update({
-        where: { id: step.itemId },
-        data: {
-          quantity: { decrement: step.amount },
-        },
-      }),
+      quantityById.get(step.itemId) === step.amount
+        ? prisma.inventoryItem.delete({ where: { id: step.itemId } })
+        : prisma.inventoryItem.update({
+            where: { id: step.itemId },
+            data: {
+              quantity: { decrement: step.amount },
+            },
+          }),
     ),
   );
 
@@ -72,3 +79,7 @@ export async function removeInventoryItem(householdId: string, itemId: string) {
 }
 
 export { InsufficientStockError };
+
+export function countStockedProducts(items: { productId: string }[]): number {
+  return new Set(items.map((item) => item.productId)).size;
+}

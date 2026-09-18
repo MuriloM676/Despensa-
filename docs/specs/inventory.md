@@ -76,9 +76,19 @@ consumption.
 **BR-003** A product may have multiple inventory items.
 
 **BR-004** Consumption must follow FEFO: entries with the earliest expiration
-date are consumed first; entries without an expiration date are consumed last.
+date are consumed first; entries without an expiration date are consumed last
+(`NULLS LAST` must be explicit in the query ordering, not rely on database
+defaults).
 
 **BR-005** Consumption cannot result in negative stock.
+
+**BR-009** Consumption that zeroes an entry finalizes it: the entry is removed
+so no zero-quantity rows remain. Inventory listings only return entries with
+quantity greater than zero, so zeroed stock never shows in the UI.
+
+**BR-010** The dashboard stock summary counts distinct products in stock, not
+the sum of quantities, because quantities mix incompatible units (e.g. kg,
+liters, units).
 
 **BR-006** Expired items are identified automatically by comparing the
 expiration date with the current date. No manual flag is stored.
@@ -111,3 +121,10 @@ the inventory is displayed, then the item is marked as expiring soon.
 **AC-005** Given two entries of the same product, one without an expiration
 date, when all other entries are exhausted, then the entry without an
 expiration date is consumed last.
+
+**AC-006** Given an item with quantity 2, when the user consumes 2 units, then
+the entry is removed and no longer appears in the inventory.
+
+**AC-007** Given products stocked in different units (e.g. 2 kg of rice and 3
+units of milk), when the dashboard is displayed, then the stock summary shows
+2 products, not 5.
