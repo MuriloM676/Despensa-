@@ -1,0 +1,17 @@
+node_modules
+.pnpm-store
+.next
+dist
+build
+.turbo
+.git
+.gitignore
+.env
+.env.*.local
+*.log
+npm-debug.log*
+pnpm-debug.log*
+coverage
+.vscode
+.idea
+.DS_Store
