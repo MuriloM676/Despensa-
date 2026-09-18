@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireUser } from "@/server/session";
 import { requireHousehold } from "@/server/household";
-import { listInventory } from "@/server/inventory";
+import { listInventory, countStockedProducts } from "@/server/inventory";
 import { getExpirationStatus } from "@/server/expiration";
 import { ExpirationStatus } from "@despensa/types";
 import { Badge } from "@despensa/ui";
@@ -29,7 +29,7 @@ export default async function DashboardPage() {
   const expired = withStatus.filter((i) => i.status === ExpirationStatus.Expired);
   const expiringSoon = withStatus.filter((i) => i.status === ExpirationStatus.ExpiringSoon);
 
-  const totalQuantity = withStatus.reduce((sum, i) => sum + i.quantity, 0);
+  const productCount = countStockedProducts(withStatus);
 
   const statusLabel: Record<ExpirationStatus, { text: string; tone: "red" | "amber" | "green" }> = {
     [ExpirationStatus.Expired]: { text: "Vencido", tone: "red" },
@@ -50,8 +50,8 @@ export default async function DashboardPage() {
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-sm text-slate-500">Itens no estoque</p>
-          <p className="mt-1 text-2xl font-bold text-slate-900">{totalQuantity}</p>
+          <p className="text-sm text-slate-500">Produtos no estoque</p>
+          <p className="mt-1 text-2xl font-bold text-slate-900">{productCount}</p>
         </div>
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
           <p className="text-sm text-amber-800">Vencem em breve</p>
