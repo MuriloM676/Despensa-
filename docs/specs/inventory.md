@@ -103,6 +103,14 @@ expiration date with the current date. No manual flag is stored.
 When both dates are given, the expiration date must be equal to or later than
 the purchase date.
 
+**BR-011** Consumption is safe under concurrency. The read-plan-write cycle
+of a consume runs inside a single serializable transaction that locks the
+product's stock rows (`SELECT ... FOR UPDATE`) before reading, so two
+simultaneous consumes never plan from the same stale snapshot (no oversell).
+The loser sees the fresh stock and fails with insufficient stock when not
+enough remains. Transient serialization conflicts are retried a small bounded
+number of times.
+
 ## Acceptance Criteria
 
 **AC-001** Given a product with two items (expiring 2026-08-10 and 2026-08-20),
@@ -128,3 +136,7 @@ the entry is removed and no longer appears in the inventory.
 **AC-007** Given products stocked in different units (e.g. 2 kg of rice and 3
 units of milk), when the dashboard is displayed, then the stock summary shows
 2 products, not 5.
+
+**AC-008** Given a product with 3 units in stock, when two consumes of 2
+units run concurrently, then exactly one succeeds, the total consumed never
+exceeds the stock, and the other fails without changing stock further.
