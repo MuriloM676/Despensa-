@@ -9,12 +9,14 @@ import {
   toggleShoppingListItemSchema,
   deleteShoppingListItemSchema,
   deleteShoppingListSchema,
+  renameShoppingListSchema,
 } from "@/lib/validations/shopping-list";
 import {
   addShoppingListItem,
   createShoppingList,
   deleteShoppingList,
   deleteShoppingListItem,
+  renameShoppingList,
   toggleShoppingListItem,
 } from "@/server/shopping-list";
 
@@ -109,4 +111,31 @@ export async function deleteShoppingListItemAction(formData: FormData) {
   const household = await requireHousehold(user.id);
   await deleteShoppingListItem(household.id, parsed.data.itemId);
   revalidatePath(`/shopping-lists/${parsed.data.listId}`);
+}
+
+export async function renameShoppingListAction(
+  _prevState: ShoppingListActionState,
+  formData: FormData,
+): Promise<ShoppingListActionState> {
+  const parsed = renameShoppingListSchema.safeParse({
+    listId: formData.get("listId"),
+    name: formData.get("name"),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+  }
+
+  const user = await requireUser();
+  const household = await requireHousehold(user.id);
+
+  try {
+    await renameShoppingList(household.id, parsed.data);
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Erro ao renomear lista" };
+  }
+
+  revalidatePath(`/shopping-lists/${parsed.data.listId}`);
+  revalidatePath("/shopping-lists");
+  return {};
 }

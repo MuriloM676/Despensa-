@@ -29,6 +29,12 @@ export const deleteShoppingListSchema = z.object({
   listId: z.string().min(1, "Lista inválida"),
 });
 
+export const renameShoppingListSchema = z.object({
+  listId: z.string().min(1, "Lista inválida"),
+  name: z.string().trim().min(1, "Informe o nome").max(120),
+});
+
 export type CreateShoppingListInput = z.infer<typeof createShoppingListSchema>;
 export type AddShoppingListItemInput = z.infer<typeof addShoppingListItemSchema>;
 export type DeleteShoppingListInput = z.infer<typeof deleteShoppingListSchema>;
+export type RenameShoppingListInput = z.infer<typeof renameShoppingListSchema>;

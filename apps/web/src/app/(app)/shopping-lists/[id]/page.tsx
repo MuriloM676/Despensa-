@@ -5,6 +5,7 @@ import { requireHousehold } from "@/server/household";
 import { getShoppingList } from "@/server/shopping-list";
 import { listProducts } from "@/server/product";
 import { ShoppingListItemForm } from "@/components/shopping-list-item-form";
+import { RenameShoppingListForm } from "@/components/shopping-list-form";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import {
   toggleShoppingListItemAction,
@@ -43,6 +44,9 @@ export default async function ShoppingListDetailPage({
         <p className="mt-1 text-sm text-slate-500">
           {list.items.length} item{list.items.length === 1 ? "" : "s"} na lista.
         </p>
+        <div className="mt-3 max-w-md">
+          <RenameShoppingListForm listId={list.id} currentName={list.name} />
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
