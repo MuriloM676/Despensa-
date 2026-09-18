@@ -7,4 +7,9 @@ export const createProductSchema = z.object({
   categoryId: z.string().optional().or(z.literal("")),
 });
 
+export const deleteProductSchema = z.object({
+  productId: z.string().min(1, "Produto inválido"),
+});
+
 export type CreateProductInput = z.infer<typeof createProductSchema>;
+export type DeleteProductInput = z.infer<typeof deleteProductSchema>;

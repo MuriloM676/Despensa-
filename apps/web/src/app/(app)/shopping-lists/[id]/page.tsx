@@ -5,6 +5,7 @@ import { requireHousehold } from "@/server/household";
 import { getShoppingList } from "@/server/shopping-list";
 import { listProducts } from "@/server/product";
 import { ShoppingListItemForm } from "@/components/shopping-list-item-form";
+import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import {
   toggleShoppingListItemAction,
   deleteShoppingListItemAction,
@@ -82,12 +83,12 @@ export default async function ShoppingListDetailPage({
                     <form action={deleteShoppingListItemAction}>
                       <input type="hidden" name="itemId" value={item.id} />
                       <input type="hidden" name="listId" value={list.id} />
-                      <button
-                        type="submit"
+                      <ConfirmSubmitButton
+                        message="Remover este item da lista?"
                         className="rounded-lg px-2 py-1 text-sm text-red-600 hover:bg-red-50"
                       >
                         Remover
-                      </button>
+                      </ConfirmSubmitButton>
                     </form>
                   </li>
                 ))}

@@ -4,12 +4,6 @@ export const EXPIRING_SOON_DAYS = 5;
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
-export function startOfDay(date: Date): Date {
-  const copy = new Date(date);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
-
 function calendarDayMs(date: Date): number {
   return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
 }

@@ -15,20 +15,6 @@ export function listInventory(householdId: string) {
   });
 }
 
-export function listExpiringInventory(householdId: string) {
-  return prisma.inventoryItem.findMany({
-    where: {
-      householdId,
-      consumedAt: null,
-      expirationDate: { not: null },
-    },
-    include: {
-      product: { include: { category: true } },
-    },
-    orderBy: { expirationDate: "asc" },
-  });
-}
-
 export async function addInventoryItem(householdId: string, input: AddInventoryItemInput) {
   const product = await prisma.product.findFirst({
     where: { id: input.productId, householdId },

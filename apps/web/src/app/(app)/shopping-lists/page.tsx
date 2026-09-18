@@ -4,6 +4,7 @@ import { requireUser } from "@/server/session";
 import { requireHousehold } from "@/server/household";
 import { listShoppingLists } from "@/server/shopping-list";
 import { NewShoppingListForm } from "@/components/shopping-list-form";
+import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { deleteShoppingListAction } from "@/server/actions/shopping-list";
 
 export const metadata: Metadata = {
@@ -47,12 +48,12 @@ export default async function ShoppingListsPage() {
                   </Link>
                   <form action={deleteShoppingListAction}>
                     <input type="hidden" name="listId" value={list.id} />
-                    <button
-                      type="submit"
+                    <ConfirmSubmitButton
+                      message={`Excluir a lista "${list.name}"?`}
                       className="rounded-lg px-2 py-1 text-sm text-red-600 hover:bg-red-50"
                     >
                       Excluir
-                    </button>
+                    </ConfirmSubmitButton>
                   </form>
                 </div>
               </li>

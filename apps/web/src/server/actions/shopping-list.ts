@@ -8,6 +8,7 @@ import {
   createShoppingListSchema,
   toggleShoppingListItemSchema,
   deleteShoppingListItemSchema,
+  deleteShoppingListSchema,
 } from "@/lib/validations/shopping-list";
 import {
   addShoppingListItem,
@@ -66,50 +67,46 @@ export async function addShoppingListItemAction(
 }
 
 export async function toggleShoppingListItemAction(formData: FormData) {
-  const user = await requireUser();
-  const household = await requireHousehold(user.id);
-
-  const itemId = formData.get("itemId");
-  const done = formData.get("done") === "true";
-  const listId = formData.get("listId");
-
-  if (typeof itemId !== "string" || typeof listId !== "string") {
-    return;
-  }
-
-  const parsed = toggleShoppingListItemSchema.safeParse({ itemId, done });
+  const parsed = toggleShoppingListItemSchema.safeParse({
+    itemId: formData.get("itemId"),
+    listId: formData.get("listId"),
+    done: formData.get("done") === "true",
+  });
   if (!parsed.success) {
     return;
   }
 
+  const user = await requireUser();
+  const household = await requireHousehold(user.id);
+
   await toggleShoppingListItem(household.id, parsed.data.itemId, parsed.data.done);
 
-  revalidatePath(`/shopping-lists/${listId}`);
+  revalidatePath(`/shopping-lists/${parsed.data.listId}`);
 }
 
 export async function deleteShoppingListAction(formData: FormData) {
-  const user = await requireUser();
-  const household = await requireHousehold(user.id);
-  const listId = formData.get("listId");
-  if (typeof listId !== "string") {
+  const parsed = deleteShoppingListSchema.safeParse({
+    listId: formData.get("listId"),
+  });
+  if (!parsed.success) {
     return;
   }
-  await deleteShoppingList(household.id, listId);
+  const user = await requireUser();
+  const household = await requireHousehold(user.id);
+  await deleteShoppingList(household.id, parsed.data.listId);
   revalidatePath("/shopping-lists");
 }
 
 export async function deleteShoppingListItemAction(formData: FormData) {
-  const user = await requireUser();
-  const household = await requireHousehold(user.id);
-  const itemId = formData.get("itemId");
-  const listId = formData.get("listId");
-  if (typeof itemId !== "string" || typeof listId !== "string") {
-    return;
-  }
-  const parsed = deleteShoppingListItemSchema.safeParse({ itemId });
+  const parsed = deleteShoppingListItemSchema.safeParse({
+    itemId: formData.get("itemId"),
+    listId: formData.get("listId"),
+  });
   if (!parsed.success) {
     return;
   }
+  const user = await requireUser();
+  const household = await requireHousehold(user.id);
   await deleteShoppingListItem(household.id, parsed.data.itemId);
-  revalidatePath(`/shopping-lists/${listId}`);
+  revalidatePath(`/shopping-lists/${parsed.data.listId}`);
 }

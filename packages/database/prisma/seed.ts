@@ -11,7 +11,7 @@ async function main() {
   const existing = await prisma.household.findFirst();
 
   if (existing) {
-    console.log("Seed skipped: a household already exists.");
+    process.stdout.write("Seed skipped: a household already exists.\n");
     return;
   }
 
@@ -25,12 +25,14 @@ async function main() {
     });
   }
 
-  console.log(`Seed complete: household "${household.name}" with ${CATEGORIES.length} categories.`);
+  process.stdout.write(
+    `Seed complete: household "${household.name}" with ${CATEGORIES.length} categories.\n`,
+  );
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    process.stderr.write(`${e instanceof Error ? e.stack ?? e.message : String(e)}\n`);
     process.exit(1);
   })
   .finally(async () => {

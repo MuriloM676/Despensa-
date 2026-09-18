@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/server/session";
 import { requireHousehold } from "@/server/household";
-import { createProductSchema } from "@/lib/validations/product";
+import { createProductSchema, deleteProductSchema } from "@/lib/validations/product";
 import { createProduct, deleteProduct } from "@/server/product";
 
 export type ProductActionState = { error?: string };
@@ -26,7 +26,11 @@ export async function createProductAction(
   const user = await requireUser();
   const household = await requireHousehold(user.id);
 
-  await createProduct(household.id, parsed.data);
+  try {
+    await createProduct(household.id, parsed.data);
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Erro ao criar produto" };
+  }
 
   revalidatePath("/products");
   revalidatePath("/inventory");
@@ -34,12 +38,14 @@ export async function createProductAction(
 }
 
 export async function deleteProductAction(formData: FormData) {
-  const user = await requireUser();
-  const household = await requireHousehold(user.id);
-  const productId = formData.get("productId");
-  if (typeof productId !== "string") {
+  const parsed = deleteProductSchema.safeParse({
+    productId: formData.get("productId"),
+  });
+  if (!parsed.success) {
     return;
   }
-  await deleteProduct(household.id, productId);
+  const user = await requireUser();
+  const household = await requireHousehold(user.id);
+  await deleteProduct(household.id, parsed.data.productId);
   revalidatePath("/products");
 }

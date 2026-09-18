@@ -47,6 +47,43 @@ describe("addInventoryItemSchema", () => {
     }
   });
 
+  it("rejects invalid dates instead of swallowing them (B4)", () => {
+    const result = addInventoryItemSchema.safeParse({
+      productId: "p1",
+      quantity: "1",
+      expirationDate: "not-a-date",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toBe("Data inválida");
+    }
+  });
+
+  it("rejects expiration before purchase date (B4)", () => {
+    const result = addInventoryItemSchema.safeParse({
+      productId: "p1",
+      quantity: "1",
+      purchaseDate: "2026-08-10",
+      expirationDate: "2026-08-01",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toBe(
+        "Validade deve ser igual ou posterior à data da compra",
+      );
+    }
+  });
+
+  it("accepts expiration equal to purchase date", () => {
+    const result = addInventoryItemSchema.safeParse({
+      productId: "p1",
+      quantity: "1",
+      purchaseDate: "2026-08-10",
+      expirationDate: "2026-08-10",
+    });
+    expect(result.success).toBe(true);
+  });
+
   it("requires a product", () => {
     const result = addInventoryItemSchema.safeParse({ quantity: "1" });
     expect(result.success).toBe(false);
