@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   addShoppingListItemSchema,
   createShoppingListSchema,
+  deleteShoppingListItemSchema,
+  deleteShoppingListSchema,
+  toggleShoppingListItemSchema,
 } from "./shopping-list";
 
 describe("createShoppingListSchema", () => {
@@ -39,5 +42,33 @@ describe("addShoppingListItemSchema", () => {
       name: "Leite",
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("toggleShoppingListItemSchema", () => {
+  it("requires listId (B5)", () => {
+    expect(
+      toggleShoppingListItemSchema.safeParse({ itemId: "i1", done: true }).success,
+    ).toBe(false);
+    expect(
+      toggleShoppingListItemSchema.safeParse({ itemId: "i1", listId: "l1", done: true })
+        .success,
+    ).toBe(true);
+  });
+});
+
+describe("deleteShoppingListItemSchema", () => {
+  it("requires itemId and listId (B5)", () => {
+    expect(deleteShoppingListItemSchema.safeParse({ itemId: "i1" }).success).toBe(false);
+    expect(
+      deleteShoppingListItemSchema.safeParse({ itemId: "i1", listId: "l1" }).success,
+    ).toBe(true);
+  });
+});
+
+describe("deleteShoppingListSchema", () => {
+  it("requires listId (B5)", () => {
+    expect(deleteShoppingListSchema.safeParse({ listId: "" }).success).toBe(false);
+    expect(deleteShoppingListSchema.safeParse({ listId: "l1" }).success).toBe(true);
   });
 });

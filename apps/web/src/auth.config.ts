@@ -23,7 +23,9 @@ export const authConfig = {
     },
     authorized({ auth, request }) {
       const isLoggedIn = !!auth?.user;
-      const isProtected = request.nextUrl.pathname.startsWith("/dashboard");
+      const isProtected = /^\/(dashboard|products|inventory|shopping-lists)(\/|$)/.test(
+        request.nextUrl.pathname,
+      );
       if (isProtected) {
         return isLoggedIn;
       }

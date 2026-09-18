@@ -15,13 +15,20 @@ export const addShoppingListItemSchema = z.object({
 });
 
 export const toggleShoppingListItemSchema = z.object({
-  itemId: z.string().min(1),
+  itemId: z.string().min(1, "Item inválido"),
+  listId: z.string().min(1, "Lista inválida"),
   done: z.boolean(),
 });
 
 export const deleteShoppingListItemSchema = z.object({
-  itemId: z.string().min(1),
+  itemId: z.string().min(1, "Item inválido"),
+  listId: z.string().min(1, "Lista inválida"),
+});
+
+export const deleteShoppingListSchema = z.object({
+  listId: z.string().min(1, "Lista inválida"),
 });
 
 export type CreateShoppingListInput = z.infer<typeof createShoppingListSchema>;
 export type AddShoppingListItemInput = z.infer<typeof addShoppingListItemSchema>;
+export type DeleteShoppingListInput = z.infer<typeof deleteShoppingListSchema>;

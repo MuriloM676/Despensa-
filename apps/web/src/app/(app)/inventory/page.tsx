@@ -7,6 +7,7 @@ import { getExpirationStatus } from "@/server/expiration";
 import { ExpirationStatus } from "@despensa/types";
 import { Badge } from "@despensa/ui";
 import { AddInventoryForm, ConsumeInventoryForm } from "@/components/inventory-forms";
+import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { removeInventoryItemAction } from "@/server/actions/inventory";
 
 export const metadata: Metadata = {
@@ -102,13 +103,13 @@ export default async function InventoryPage() {
                             <Badge tone={statusTone[status]}>{statusLabel[status]}</Badge>
                             <form action={removeInventoryItemAction}>
                               <input type="hidden" name="itemId" value={item.id} />
-                              <button
-                                type="submit"
+                              <ConfirmSubmitButton
+                                message="Remover este item do estoque?"
                                 className="rounded-lg px-2 py-1 text-sm text-red-600 hover:bg-red-50"
                                 title="Remover item"
                               >
                                 Remover
-                              </button>
+                              </ConfirmSubmitButton>
                             </form>
                           </div>
                         </li>

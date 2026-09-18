@@ -55,9 +55,9 @@ export async function addShoppingListItem(householdId: string, input: AddShoppin
   }
 
   const productId = input.productId || null;
-  const name = input.name || null;
+  const trimmedName = input.name?.trim() || null;
 
-  if (!productId && !name) {
+  if (!productId && !trimmedName) {
     throw new Error("Informe o nome ou selecione um produto");
   }
 
@@ -65,7 +65,7 @@ export async function addShoppingListItem(householdId: string, input: AddShoppin
     data: {
       listId: input.listId,
       productId,
-      name: productId ? null : name,
+      name: trimmedName,
       quantity: input.quantity,
     },
   });

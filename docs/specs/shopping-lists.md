@@ -44,6 +44,9 @@ and a quantity.
 
 **BR-004** Only members of the household can access its lists.
 
+**BR-005** An item may carry both a product link and a custom name; the name
+is stored as given and never silently discarded.
+
 ## Acceptance Criteria
 
 **AC-001** Given a user in a household, when the user creates a list named

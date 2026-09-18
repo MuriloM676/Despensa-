@@ -6,6 +6,7 @@ import { requireHousehold } from "@/server/household";
 import {
   addInventoryItemSchema,
   consumeInventorySchema,
+  removeInventoryItemSchema,
 } from "@/lib/validations/inventory";
 import { addInventoryItem, consumeInventory, removeInventoryItem } from "@/server/inventory";
 
@@ -29,7 +30,11 @@ export async function addInventoryItemAction(
   const user = await requireUser();
   const household = await requireHousehold(user.id);
 
-  await addInventoryItem(household.id, parsed.data);
+  try {
+    await addInventoryItem(household.id, parsed.data);
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Erro ao adicionar item" };
+  }
 
   revalidatePath("/inventory");
   revalidatePath("/dashboard");
@@ -64,13 +69,15 @@ export async function consumeInventoryAction(
 }
 
 export async function removeInventoryItemAction(formData: FormData) {
-  const user = await requireUser();
-  const household = await requireHousehold(user.id);
-  const itemId = formData.get("itemId");
-  if (typeof itemId !== "string") {
+  const parsed = removeInventoryItemSchema.safeParse({
+    itemId: formData.get("itemId"),
+  });
+  if (!parsed.success) {
     return;
   }
-  await removeInventoryItem(household.id, itemId);
+  const user = await requireUser();
+  const household = await requireHousehold(user.id);
+  await removeInventoryItem(household.id, parsed.data.itemId);
   revalidatePath("/inventory");
   revalidatePath("/dashboard");
 }

@@ -89,6 +89,10 @@ expiration date with the current date. No manual flag is stored.
   days, inclusive of today).
 - `valid` — anything else, or no expiration date.
 
+**BR-008** Invalid purchase or expiration dates are rejected with an error.
+When both dates are given, the expiration date must be equal to or later than
+the purchase date.
+
 ## Acceptance Criteria
 
 **AC-001** Given a product with two items (expiring 2026-08-10 and 2026-08-20),

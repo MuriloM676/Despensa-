@@ -3,6 +3,7 @@ import { requireUser } from "@/server/session";
 import { requireHousehold } from "@/server/household";
 import { listProducts, listCategories } from "@/server/product";
 import { ProductForm } from "@/components/product-form";
+import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { deleteProductAction } from "@/server/actions/product";
 
 export const metadata: Metadata = {
@@ -52,12 +53,12 @@ export default async function ProductsPage() {
                   </div>
                   <form action={deleteProductAction}>
                     <input type="hidden" name="productId" value={product.id} />
-                    <button
-                      type="submit"
+                    <ConfirmSubmitButton
+                      message={`Excluir o produto "${product.name}"?`}
                       className="rounded-lg px-2 py-1 text-sm text-red-600 hover:bg-red-50"
                     >
                       Excluir
-                    </button>
+                    </ConfirmSubmitButton>
                   </form>
                 </li>
               ))}
