@@ -27,12 +27,30 @@ function isUniqueViolation(error: unknown): boolean {
 
 export async function createProduct(householdId: string, input: CreateProductInput) {
   const categoryId = input.categoryId || null;
+  const brand = input.brand || null;
+
+  if (categoryId) {
+    const category = await prisma.productCategory.findFirst({
+      where: { id: categoryId, householdId },
+    });
+    if (!category) {
+      throw new Error("Categoria inválida");
+    }
+  }
+
+  const existing = await prisma.product.findFirst({
+    where: { householdId, name: input.name, brand },
+  });
+  if (existing) {
+    throw new Error("Produto já cadastrado com este nome e marca");
+  }
+
   try {
     return await prisma.product.create({
       data: {
         householdId,
         name: input.name,
-        brand: input.brand || null,
+        brand,
         unit: input.unit,
         categoryId,
       },

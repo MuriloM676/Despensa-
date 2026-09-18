@@ -4,6 +4,7 @@ import {
   createShoppingListSchema,
   deleteShoppingListItemSchema,
   deleteShoppingListSchema,
+  renameShoppingListSchema,
   toggleShoppingListItemSchema,
 } from "./shopping-list";
 
@@ -70,5 +71,37 @@ describe("deleteShoppingListSchema", () => {
   it("requires listId (B5)", () => {
     expect(deleteShoppingListSchema.safeParse({ listId: "" }).success).toBe(false);
     expect(deleteShoppingListSchema.safeParse({ listId: "l1" }).success).toBe(true);
+  });
+});
+
+describe("renameShoppingListSchema (FR-002)", () => {
+  it("requires listId", () => {
+    expect(renameShoppingListSchema.safeParse({ name: "Feira" }).success).toBe(false);
+    expect(renameShoppingListSchema.safeParse({ listId: "", name: "Feira" }).success).toBe(
+      false,
+    );
+  });
+
+  it("requires a non-empty name", () => {
+    expect(renameShoppingListSchema.safeParse({ listId: "l1", name: "" }).success).toBe(
+      false,
+    );
+    expect(renameShoppingListSchema.safeParse({ listId: "l1", name: "  " }).success).toBe(
+      false,
+    );
+    expect(renameShoppingListSchema.safeParse({ listId: "l1", name: "Feira" }).success).toBe(
+      true,
+    );
+  });
+
+  it("trims the name and rejects names longer than 120 chars", () => {
+    const result = renameShoppingListSchema.safeParse({ listId: "l1", name: "  Feira  " });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.name).toBe("Feira");
+    }
+    expect(
+      renameShoppingListSchema.safeParse({ listId: "l1", name: "x".repeat(121) }).success,
+    ).toBe(false);
   });
 });

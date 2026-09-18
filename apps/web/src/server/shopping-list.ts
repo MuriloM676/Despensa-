@@ -2,6 +2,7 @@ import { prisma } from "@despensa/database";
 import type {
   CreateShoppingListInput,
   AddShoppingListItemInput,
+  RenameShoppingListInput,
 } from "@/lib/validations/shopping-list";
 
 export function listShoppingLists(householdId: string) {
@@ -40,6 +41,19 @@ export async function createShoppingList(householdId: string, input: CreateShopp
 export async function deleteShoppingList(householdId: string, listId: string) {
   const result = await prisma.shoppingList.deleteMany({
     where: { id: listId, householdId },
+  });
+  if (result.count === 0) {
+    throw new Error("Lista não encontrada");
+  }
+}
+
+export async function renameShoppingList(
+  householdId: string,
+  input: RenameShoppingListInput,
+) {
+  const result = await prisma.shoppingList.updateMany({
+    where: { id: input.listId, householdId },
+    data: { name: input.name },
   });
   if (result.count === 0) {
     throw new Error("Lista não encontrada");
