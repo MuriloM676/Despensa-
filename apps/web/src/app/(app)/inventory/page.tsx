@@ -4,6 +4,7 @@ import { requireHousehold } from "@/server/household";
 import { listInventory } from "@/server/inventory";
 import { listProducts } from "@/server/product";
 import { getExpirationStatus } from "@/server/expiration";
+import { findLowStock } from "@/server/stock-alerts";
 import { quantityToNumber, formatQuantity } from "@/lib/quantity";
 import { ExpirationStatus } from "@despensa/types";
 import { Badge } from "@despensa/ui";
@@ -34,6 +35,21 @@ export default async function InventoryPage() {
     list.push(item);
     grouped.set(item.productId, list);
   }
+
+  const lowStockIds = new Set(
+    findLowStock(
+      products.map((product) => ({
+        id: product.id,
+        minStockLevel: quantityToNumber(product.minStockLevel),
+      })),
+      new Map(
+        [...grouped.entries()].map(([productId, items]) => [
+          productId,
+          items.reduce((sum, i) => sum + quantityToNumber(i.quantity), 0),
+        ]),
+      ),
+    ).map((entry) => entry.productId),
+  );
 
   const statusTone: Record<ExpirationStatus, "red" | "amber" | "green" | "slate"> = {
     [ExpirationStatus.Expired]: "red",
@@ -77,13 +93,18 @@ export default async function InventoryPage() {
             [...grouped.entries()].map(([productId, items]) => {
               const product = items[0]!.product;
               const total = items.reduce((sum, i) => sum + quantityToNumber(i.quantity), 0);
+              const minStock = quantityToNumber(product.minStockLevel);
               return (
                 <div key={productId} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                   <div className="flex items-center justify-between">
                     <h2 className="text-sm font-semibold text-slate-900">
-                      {product.name}
+                      {product.name}{" "}
+                      {lowStockIds.has(productId) ? (
+                        <Badge tone="amber">Estoque baixo</Badge>
+                      ) : null}
                       <span className="ml-2 text-xs font-normal text-slate-500">
                         {formatQuantity(total)} {product.unit} no total
+                        {minStock > 0 ? ` · Mín. ${formatQuantity(minStock)}` : ""}
                       </span>
                     </h2>
                   </div>

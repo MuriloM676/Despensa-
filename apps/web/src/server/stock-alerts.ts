@@ -81,6 +81,18 @@ export function findLowStock(
   return result;
 }
 
+/**
+ * Lightweight per-product stock totals for pages that need low-stock badges
+ * without loading full inventory entries.
+ */
+export async function getStockTotals(householdId: string): Promise<Map<string, number>> {
+  const items = await prisma.inventoryItem.findMany({
+    where: { householdId, consumedAt: null, quantity: { gt: 0 } },
+    select: { productId: true, quantity: true },
+  });
+  return sumStockByProduct(items);
+}
+
 export async function getReplenishmentSuggestions(
   householdId: string,
 ): Promise<ReplenishmentSuggestion[]> {

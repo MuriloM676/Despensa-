@@ -65,6 +65,24 @@ export function ProductForm({
         <Input id="unit" name="unit" type="text" defaultValue="un" placeholder="Ex.: un, L, kg" />
       </div>
 
+      <div className="space-y-1">
+        <label htmlFor="minStockLevel" className="block text-sm font-medium text-slate-700">
+          Estoque mínimo
+        </label>
+        <Input
+          id="minStockLevel"
+          name="minStockLevel"
+          type="number"
+          min="0"
+          step="0.001"
+          defaultValue="0"
+          placeholder="Ex.: 2 — 0 significa sem mínimo"
+        />
+        <p className="text-xs text-slate-500">
+          Abaixo desse nível o produto aparece como estoque baixo.
+        </p>
+      </div>
+
       <Button type="submit" disabled={pending}>
         {pending ? "Salvando..." : "Adicionar produto"}
       </Button>
