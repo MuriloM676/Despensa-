@@ -56,6 +56,7 @@ export async function createProduct(householdId: string, input: CreateProductInp
         name: input.name,
         brand,
         unit: input.unit,
+        minStockLevel: input.minStockLevel,
         categoryId,
       },
     });
@@ -111,6 +112,7 @@ export async function updateProduct(
         name: input.name,
         brand,
         unit: input.unit,
+        minStockLevel: input.minStockLevel,
         categoryId,
       },
     });

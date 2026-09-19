@@ -75,7 +75,7 @@ describe("critical path: login -> produto -> estoque -> lista (B11)", () => {
       name: "Leite",
       brand: "",
       unit: "L",
-      categoryId: "",
+      categoryId: "", minStockLevel: 0,
     });
     await addInventoryItem(household.id, {
       productId: product.id,
@@ -141,7 +141,7 @@ describe("critical path: login -> produto -> estoque -> lista (B11)", () => {
       name: "Leite",
       brand: "",
       unit: "L",
-      categoryId: "",
+      categoryId: "", minStockLevel: 0,
     });
     await addInventoryItem(homeA.id, {
       productId: product.id,

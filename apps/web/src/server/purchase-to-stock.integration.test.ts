@@ -45,7 +45,7 @@ describe("purchase-to-stock integration (B11, FR-009)", () => {
       name: "Leite",
       brand: "",
       unit: "L",
-      categoryId: "",
+      categoryId: "", minStockLevel: 0,
     });
     const { listId, itemId } = await doneItem({ productId: product.id, quantity: 2 });
 
@@ -86,7 +86,7 @@ describe("purchase-to-stock integration (B11, FR-009)", () => {
       name: "Tapioca",
       brand: "",
       unit: "un",
-      categoryId: "",
+      categoryId: "", minStockLevel: 0,
     });
     const { listId, itemId } = await doneItem({ name: "Tapioca" });
 
@@ -105,7 +105,7 @@ describe("purchase-to-stock integration (B11, FR-009)", () => {
       name: "Iogurte",
       brand: "",
       unit: "un",
-      categoryId: "",
+      categoryId: "", minStockLevel: 0,
     });
     const { listId, itemId } = await doneItem({ productId: product.id });
 
@@ -125,7 +125,7 @@ describe("purchase-to-stock integration (B11, FR-009)", () => {
       name: "Farinha",
       brand: "",
       unit: "kg",
-      categoryId: "",
+      categoryId: "", minStockLevel: 0,
     });
     const { listId, itemId } = await doneItem({ productId: product.id, quantity: 0.5 });
 
@@ -181,7 +181,7 @@ describe("purchase-to-stock integration (B11, FR-009)", () => {
       name: "Alheio",
       brand: "",
       unit: "un",
-      categoryId: "",
+      categoryId: "", minStockLevel: 0,
     });
     const db = getTestDb();
     const list = await db.prisma.shoppingList.create({

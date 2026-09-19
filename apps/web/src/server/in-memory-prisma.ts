@@ -32,6 +32,7 @@ export interface TestUser {
 export interface TestHousehold {
   id: string;
   name: string;
+  alertWindowDays: number;
 }
 
 export interface TestMembership {
@@ -53,6 +54,7 @@ export interface TestProduct {
   name: string;
   brand: string | null;
   unit: string;
+  minStockLevel: number;
   categoryId: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -85,6 +87,16 @@ export interface TestShoppingListItem {
   name: string | null;
   quantity: number;
   done: boolean;
+  createdAt: Date;
+}
+
+export interface TestStockEvent {
+  id: string;
+  householdId: string;
+  productId: string;
+  kind: string;
+  quantity: number;
+  note: string | null;
   createdAt: Date;
 }
 
@@ -136,6 +148,7 @@ export interface TestPrisma {
   };
   household: {
     create(args: { data: LooseRecord }): Promise<TestHousehold>;
+    update(args: { where: LooseRecord; data: LooseRecord }): Promise<TestHousehold>;
   };
   householdMember: {
     findFirst(args: { where: LooseRecord; include?: LooseRecord }): Promise<unknown>;
@@ -158,6 +171,7 @@ export interface TestPrisma {
     deleteMany(args: { where: LooseRecord }): Promise<{ count: number }>;
   };
   inventoryItem: {
+    findFirst(args: { where: LooseRecord }): Promise<unknown>;
     findMany(args: { where?: LooseRecord; orderBy?: unknown }): Promise<unknown[]>;
     create(args: { data: LooseRecord }): Promise<TestInventoryItem>;
     update(args: { where: LooseRecord; data: LooseRecord }): Promise<TestInventoryItem>;
@@ -181,6 +195,14 @@ export interface TestPrisma {
     update(args: { where: LooseRecord; data: LooseRecord }): Promise<TestShoppingListItem>;
     delete(args: { where: LooseRecord }): Promise<TestShoppingListItem>;
   };
+  stockEvent: {
+    create(args: { data: LooseRecord }): Promise<TestStockEvent>;
+    findMany(args: {
+      where?: LooseRecord;
+      orderBy?: unknown;
+      take?: number;
+    }): Promise<TestStockEvent[]>;
+  };
   $transaction(ops: Promise<unknown>[]): Promise<unknown[]>;
   $transaction<T>(
     fn: (tx: TestPrisma) => Promise<T>,
@@ -199,6 +221,7 @@ export interface InMemoryDb {
   inventory: Map<string, TestInventoryItem>;
   lists: Map<string, TestShoppingList>;
   listItems: Map<string, TestShoppingListItem>;
+  events: Map<string, TestStockEvent>;
   /** One-shot hook to simulate a P2002 race the app-level check missed. */
   failNextProductCreateWithP2002: boolean;
   prisma: TestPrisma;
@@ -266,6 +289,7 @@ export function createInMemoryPrisma(): InMemoryDb {
     inventory: new Map(),
     lists: new Map(),
     listItems: new Map(),
+    events: new Map(),
     failNextProductCreateWithP2002: false,
     // Assigned just below; the methods close over `db`.
     prisma: undefined as unknown as TestPrisma,
@@ -278,6 +302,7 @@ export function createInMemoryPrisma(): InMemoryDb {
       db.inventory.clear();
       db.lists.clear();
       db.listItems.clear();
+      db.events.clear();
       db.failNextProductCreateWithP2002 = false;
       txTail = Promise.resolve();
       seq = 0;
@@ -375,7 +400,11 @@ export function createInMemoryPrisma(): InMemoryDb {
     },
     household: {
       create: async (args: { data: LooseRecord }): Promise<TestHousehold> => {
-        const household: TestHousehold = { id: nextId("household"), name: "Minha despensa" };
+        const household: TestHousehold = {
+          id: nextId("household"),
+          name: "Minha despensa",
+          alertWindowDays: 5,
+        };
         db.households.set(household.id, household);
         const nested = args.data.members as LooseRecord | undefined;
         const memberData = nested?.create as LooseRecord | undefined;
@@ -388,6 +417,18 @@ export function createInMemoryPrisma(): InMemoryDb {
           };
           db.memberships.set(membership.id, membership);
         }
+        return household;
+      },
+      update: async (args: {
+        where: LooseRecord;
+        data: LooseRecord;
+      }): Promise<TestHousehold> => {
+        const household = db.households.get(String(args.where.id));
+        if (!household) throw new Error("Household não encontrado");
+        if ("alertWindowDays" in args.data) {
+          household.alertWindowDays = Number(args.data.alertWindowDays);
+        }
+        if ("name" in args.data) household.name = String(args.data.name);
         return household;
       },
     },
@@ -493,6 +534,7 @@ export function createInMemoryPrisma(): InMemoryDb {
           name: String(data.name),
           brand,
           unit: String(data.unit ?? "un"),
+          minStockLevel: Number(data.minStockLevel ?? 0),
           categoryId: (data.categoryId as string | null) ?? null,
           createdAt: now,
           updatedAt: now,
@@ -524,6 +566,9 @@ export function createInMemoryPrisma(): InMemoryDb {
         if ("name" in args.data) product.name = String(args.data.name);
         if ("brand" in args.data) product.brand = (args.data.brand as string | null) ?? null;
         if ("unit" in args.data) product.unit = String(args.data.unit);
+        if ("minStockLevel" in args.data) {
+          product.minStockLevel = Number(args.data.minStockLevel);
+        }
         if ("categoryId" in args.data) {
           product.categoryId = (args.data.categoryId as string | null) ?? null;
         }
@@ -532,6 +577,14 @@ export function createInMemoryPrisma(): InMemoryDb {
       },
     },
     inventoryItem: {
+      findFirst: async (args: { where: LooseRecord }): Promise<unknown> => {
+        for (const item of db.inventory.values()) {
+          if (matchesWhere(item as unknown as LooseRecord, args.where)) {
+            return withProduct(item);
+          }
+        }
+        return null;
+      },
       findMany: async (args: { where?: LooseRecord; orderBy?: unknown }): Promise<unknown[]> => {
         const rows = [...db.inventory.values()].filter((item) =>
           matchesWhere(item as unknown as LooseRecord, args.where),
@@ -703,6 +756,32 @@ export function createInMemoryPrisma(): InMemoryDb {
         if (!item) throw new Error("Item não encontrado");
         db.listItems.delete(item.id);
         return item;
+      },
+    },
+    stockEvent: {
+      create: async (args: { data: LooseRecord }): Promise<TestStockEvent> => {
+        const event: TestStockEvent = {
+          id: nextId("event"),
+          householdId: String(args.data.householdId),
+          productId: String(args.data.productId),
+          kind: String(args.data.kind),
+          quantity: Number(args.data.quantity),
+          note: (args.data.note as string | null) ?? null,
+          createdAt: new Date(),
+        };
+        db.events.set(event.id, event);
+        return event;
+      },
+      findMany: async (args: {
+        where?: LooseRecord;
+        orderBy?: unknown;
+        take?: number;
+      }): Promise<TestStockEvent[]> => {
+        const rows = [...db.events.values()].filter((event) =>
+          matchesWhere(event as unknown as LooseRecord, args.where),
+        );
+        rows.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        return typeof args.take === "number" ? rows.slice(0, args.take) : rows;
       },
     },
     $transaction: ((arg: Promise<unknown>[] | ((tx: TestPrisma) => Promise<unknown>)) => {

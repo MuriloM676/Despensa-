@@ -38,7 +38,7 @@ describe("product integration (B11, in-memory Prisma)", () => {
       name: "Leite",
       brand: "",
       unit: "L",
-      categoryId: category.id,
+      categoryId: category.id, minStockLevel: 0,
     });
 
     expect(product).toMatchObject({
@@ -46,7 +46,7 @@ describe("product integration (B11, in-memory Prisma)", () => {
       name: "Leite",
       brand: null,
       unit: "L",
-      categoryId: category.id,
+      categoryId: category.id, minStockLevel: 0,
     });
 
     const listed = (await listProducts(HOUSEHOLD)) as unknown as Array<{
@@ -63,7 +63,7 @@ describe("product integration (B11, in-memory Prisma)", () => {
       name: "Café",
       brand: "Pilão",
       unit: "g",
-      categoryId: "",
+      categoryId: "", minStockLevel: 0,
     });
 
     await expect(
@@ -71,16 +71,16 @@ describe("product integration (B11, in-memory Prisma)", () => {
         name: "Café",
         brand: "Pilão",
         unit: "g",
-        categoryId: "",
+        categoryId: "", minStockLevel: 0,
       }),
     ).rejects.toThrow(DUPLICATE_MESSAGE);
   });
 
   it("rejects duplicates with empty brand (NULL brand, app-level)", async () => {
-    await createProduct(HOUSEHOLD, { name: "Açúcar", brand: "", unit: "kg", categoryId: "" });
+    await createProduct(HOUSEHOLD, { name: "Açúcar", brand: "", unit: "kg", categoryId: "", minStockLevel: 0 });
 
     await expect(
-      createProduct(HOUSEHOLD, { name: "Açúcar", brand: "", unit: "kg", categoryId: "" }),
+      createProduct(HOUSEHOLD, { name: "Açúcar", brand: "", unit: "kg", categoryId: "", minStockLevel: 0 }),
     ).rejects.toThrow(DUPLICATE_MESSAGE);
   });
 
@@ -92,7 +92,7 @@ describe("product integration (B11, in-memory Prisma)", () => {
         name: "Corrida",
         brand: "Única",
         unit: "un",
-        categoryId: "",
+        categoryId: "", minStockLevel: 0,
       }),
     ).rejects.toThrow(DUPLICATE_MESSAGE);
   });
@@ -102,14 +102,14 @@ describe("product integration (B11, in-memory Prisma)", () => {
       name: "Leite",
       brand: "Parmalat",
       unit: "L",
-      categoryId: "",
+      categoryId: "", minStockLevel: 0,
     });
 
     const other = await createProduct(OTHER, {
       name: "Leite",
       brand: "Parmalat",
       unit: "L",
-      categoryId: "",
+      categoryId: "", minStockLevel: 0,
     });
     expect(other.householdId).toBe(OTHER);
   });
@@ -119,13 +119,13 @@ describe("product integration (B11, in-memory Prisma)", () => {
       name: "Leite",
       brand: "A",
       unit: "L",
-      categoryId: "",
+      categoryId: "", minStockLevel: 0,
     });
     const second = await createProduct(HOUSEHOLD, {
       name: "Leite",
       brand: "B",
       unit: "L",
-      categoryId: "",
+      categoryId: "", minStockLevel: 0,
     });
     expect(second.brand).toBe("B");
   });
@@ -136,7 +136,7 @@ describe("product integration (B11, in-memory Prisma)", () => {
         name: "Leite",
         brand: "",
         unit: "L",
-        categoryId: "missing",
+        categoryId: "missing", minStockLevel: 0,
       }),
     ).rejects.toThrow("Categoria inválida");
 
@@ -148,7 +148,7 @@ describe("product integration (B11, in-memory Prisma)", () => {
         name: "Leite",
         brand: "",
         unit: "L",
-        categoryId: foreign.id,
+        categoryId: foreign.id, minStockLevel: 0,
       }),
     ).rejects.toThrow("Categoria inválida");
   });
@@ -158,7 +158,7 @@ describe("product integration (B11, in-memory Prisma)", () => {
       name: "Leite",
       brand: "",
       unit: "L",
-      categoryId: "",
+      categoryId: "", minStockLevel: 0,
     });
     await getTestDb().prisma.productCategory.create({
       data: { householdId: HOUSEHOLD, name: "Bebidas" },
@@ -190,7 +190,7 @@ describe("product integration (B11, in-memory Prisma)", () => {
       name: "Leite",
       brand: "",
       unit: "L",
-      categoryId: "",
+      categoryId: "", minStockLevel: 0,
     });
 
     const updated = await updateProduct(HOUSEHOLD, product.id, {
@@ -198,14 +198,14 @@ describe("product integration (B11, in-memory Prisma)", () => {
       name: "Café",
       brand: "Pilão",
       unit: "g",
-      categoryId: dairy.id,
+      categoryId: dairy.id, minStockLevel: 0,
     });
 
     expect(updated).toMatchObject({
       name: "Café",
       brand: "Pilão",
       unit: "g",
-      categoryId: dairy.id,
+      categoryId: dairy.id, minStockLevel: 0,
     });
   });
 
@@ -214,13 +214,13 @@ describe("product integration (B11, in-memory Prisma)", () => {
       name: "Leite",
       brand: "A",
       unit: "L",
-      categoryId: "",
+      categoryId: "", minStockLevel: 0,
     });
     const second = await createProduct(HOUSEHOLD, {
       name: "Café",
       brand: "",
       unit: "g",
-      categoryId: "",
+      categoryId: "", minStockLevel: 0,
     });
 
     await expect(
@@ -229,7 +229,7 @@ describe("product integration (B11, in-memory Prisma)", () => {
         name: "Leite",
         brand: "A",
         unit: "L",
-        categoryId: "",
+        categoryId: "", minStockLevel: 0,
       }),
     ).rejects.toThrow(DUPLICATE_MESSAGE);
 
@@ -238,7 +238,7 @@ describe("product integration (B11, in-memory Prisma)", () => {
       name: "Leite",
       brand: "A",
       unit: "L",
-      categoryId: "",
+      categoryId: "", minStockLevel: 0,
     });
     expect(kept.id).toBe(first.id);
   });
@@ -248,7 +248,7 @@ describe("product integration (B11, in-memory Prisma)", () => {
       name: "Leite",
       brand: "",
       unit: "L",
-      categoryId: "",
+      categoryId: "", minStockLevel: 0,
     });
 
     await expect(
@@ -257,7 +257,7 @@ describe("product integration (B11, in-memory Prisma)", () => {
         name: "Café",
         brand: "",
         unit: "g",
-        categoryId: "",
+        categoryId: "", minStockLevel: 0,
       }),
     ).rejects.toThrow("Produto não encontrado");
 
@@ -267,7 +267,7 @@ describe("product integration (B11, in-memory Prisma)", () => {
         name: "Café",
         brand: "",
         unit: "g",
-        categoryId: "",
+        categoryId: "", minStockLevel: 0,
       }),
     ).rejects.toThrow("Produto não encontrado");
 
@@ -280,7 +280,7 @@ describe("product integration (B11, in-memory Prisma)", () => {
         name: "Café",
         brand: "",
         unit: "g",
-        categoryId: foreign.id,
+        categoryId: foreign.id, minStockLevel: 0,
       }),
     ).rejects.toThrow("Categoria inválida");
   });
@@ -303,7 +303,7 @@ describe("product integration (B11, in-memory Prisma)", () => {
       name: "Leite",
       brand: "",
       unit: "L",
-      categoryId: category.id,
+      categoryId: category.id, minStockLevel: 0,
     });
 
     const untouched = await deleteCategory(OTHER, category.id);
@@ -329,13 +329,13 @@ describe("product integration (B11, in-memory Prisma)", () => {
       name: "Arroz",
       brand: "",
       unit: "kg",
-      categoryId: "",
+      categoryId: "", minStockLevel: 0,
     });
     const milk = await createProduct(HOUSEHOLD, {
       name: "Leite",
       brand: "",
       unit: "L",
-      categoryId: "",
+      categoryId: "", minStockLevel: 0,
     });
     for (let i = 0; i < 2; i += 1) {
       await db.prisma.inventoryItem.create({
@@ -360,7 +360,7 @@ describe("product integration (B11, in-memory Prisma)", () => {
       name: "Leite",
       brand: "",
       unit: "L",
-      categoryId: "",
+      categoryId: "", minStockLevel: 0,
     });
     await db.prisma.inventoryItem.create({
       data: {

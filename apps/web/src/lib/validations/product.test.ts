@@ -31,6 +31,31 @@ describe("createProductSchema", () => {
       createProductSchema.safeParse({ name: "Leite", unit: "x".repeat(21) }).success,
     ).toBe(false);
   });
+
+  it("defaults the minimum stock level to 0 (replenishment FR-001)", () => {
+    const result = createProductSchema.safeParse({ name: "Leite" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.minStockLevel).toBe(0);
+    }
+  });
+
+  it("accepts pt-BR decimals for the minimum stock level (replenishment BR-001)", () => {
+    const result = createProductSchema.safeParse({ name: "Leite", minStockLevel: "2,5" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.minStockLevel).toBe(2.5);
+    }
+  });
+
+  it("rejects negative or over-precise minimum stock levels (replenishment BR-001)", () => {
+    expect(
+      createProductSchema.safeParse({ name: "Leite", minStockLevel: -1 }).success,
+    ).toBe(false);
+    expect(
+      createProductSchema.safeParse({ name: "Leite", minStockLevel: 1.2345 }).success,
+    ).toBe(false);
+  });
 });
 
 describe("deleteProductSchema", () => {

@@ -53,14 +53,27 @@ export async function addInventoryItem(householdId: string, input: AddInventoryI
     throw new Error("Produto não encontrado");
   }
 
-  return prisma.inventoryItem.create({
-    data: {
-      householdId,
-      productId: input.productId,
-      quantity: input.quantity,
-      purchaseDate: input.purchaseDate ?? new Date(),
-      expirationDate: input.expirationDate ?? null,
-    },
+  // Stock history (BR-001 of `stock-history.md`): the PURCHASE event is
+  // written in the same transaction as the stock entry.
+  return prisma.$transaction(async (tx) => {
+    const entry = await tx.inventoryItem.create({
+      data: {
+        householdId,
+        productId: input.productId,
+        quantity: input.quantity,
+        purchaseDate: input.purchaseDate ?? new Date(),
+        expirationDate: input.expirationDate ?? null,
+      },
+    });
+    await tx.stockEvent.create({
+      data: {
+        householdId,
+        productId: input.productId,
+        kind: "PURCHASE",
+        quantity: input.quantity,
+      },
+    });
+    return entry;
   });
 }
 
@@ -110,6 +123,18 @@ export async function consumeInventory(householdId: string, input: ConsumeInvent
             ),
           );
 
+          // Stock history (BR-004 of `stock-history.md`): one CONSUME event
+          // per consumption call with the aggregate quantity. Inside the
+          // same transaction, so a failed consume leaves no event.
+          await tx.stockEvent.create({
+            data: {
+              householdId,
+              productId: input.productId,
+              kind: "CONSUME",
+              quantity: input.quantity,
+            },
+          });
+
           return plan;
         },
         { isolationLevel: "Serializable", maxWait: 5000, timeout: 15000 },
@@ -123,12 +148,25 @@ export async function consumeInventory(householdId: string, input: ConsumeInvent
 }
 
 export async function removeInventoryItem(householdId: string, itemId: string) {
-  const result = await prisma.inventoryItem.deleteMany({
-    where: { id: itemId, householdId },
+  // Stock history (BR-001 of `stock-history.md`): the REMOVE event is
+  // written in the same transaction as the deletion.
+  await prisma.$transaction(async (tx) => {
+    const item = await tx.inventoryItem.findFirst({
+      where: { id: itemId, householdId },
+    });
+    if (!item) {
+      throw new Error("Item não encontrado");
+    }
+    await tx.inventoryItem.delete({ where: { id: item.id } });
+    await tx.stockEvent.create({
+      data: {
+        householdId,
+        productId: item.productId,
+        kind: "REMOVE",
+        quantity: quantityToNumber(item.quantity),
+      },
+    });
   });
-  if (result.count === 0) {
-    throw new Error("Item não encontrado");
-  }
 }
 
 export { InsufficientStockError };
