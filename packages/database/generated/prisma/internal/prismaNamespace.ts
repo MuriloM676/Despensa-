@@ -407,7 +407,8 @@ export const ModelName = {
   Product: 'Product',
   InventoryItem: 'InventoryItem',
   ShoppingList: 'ShoppingList',
-  ShoppingListItem: 'ShoppingListItem'
+  ShoppingListItem: 'ShoppingListItem',
+  StockEvent: 'StockEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -423,7 +424,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "account" | "session" | "verificationToken" | "household" | "householdMember" | "productCategory" | "product" | "inventoryItem" | "shoppingList" | "shoppingListItem"
+    modelProps: "user" | "account" | "session" | "verificationToken" | "household" | "householdMember" | "productCategory" | "product" | "inventoryItem" | "shoppingList" | "shoppingListItem" | "stockEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1241,6 +1242,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    StockEvent: {
+      payload: Prisma.$StockEventPayload<ExtArgs>
+      fields: Prisma.StockEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.StockEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StockEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.StockEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StockEventPayload>
+        }
+        findFirst: {
+          args: Prisma.StockEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StockEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.StockEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StockEventPayload>
+        }
+        findMany: {
+          args: Prisma.StockEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StockEventPayload>[]
+        }
+        create: {
+          args: Prisma.StockEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StockEventPayload>
+        }
+        createMany: {
+          args: Prisma.StockEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.StockEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StockEventPayload>[]
+        }
+        delete: {
+          args: Prisma.StockEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StockEventPayload>
+        }
+        update: {
+          args: Prisma.StockEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StockEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.StockEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.StockEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.StockEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StockEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.StockEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StockEventPayload>
+        }
+        aggregate: {
+          args: Prisma.StockEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateStockEvent>
+        }
+        groupBy: {
+          args: Prisma.StockEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StockEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.StockEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StockEventCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1334,6 +1409,7 @@ export type VerificationTokenScalarFieldEnum = (typeof VerificationTokenScalarFi
 export const HouseholdScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  alertWindowDays: 'alertWindowDays',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1368,6 +1444,7 @@ export const ProductScalarFieldEnum = {
   name: 'name',
   brand: 'brand',
   unit: 'unit',
+  minStockLevel: 'minStockLevel',
   categoryId: 'categoryId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1413,6 +1490,19 @@ export const ShoppingListItemScalarFieldEnum = {
 } as const
 
 export type ShoppingListItemScalarFieldEnum = (typeof ShoppingListItemScalarFieldEnum)[keyof typeof ShoppingListItemScalarFieldEnum]
+
+
+export const StockEventScalarFieldEnum = {
+  id: 'id',
+  householdId: 'householdId',
+  productId: 'productId',
+  kind: 'kind',
+  quantity: 'quantity',
+  note: 'note',
+  createdAt: 'createdAt'
+} as const
+
+export type StockEventScalarFieldEnum = (typeof StockEventScalarFieldEnum)[keyof typeof StockEventScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1519,6 +1609,20 @@ export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMo
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
+ * Reference to a field of type 'StockEventKind'
+ */
+export type EnumStockEventKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StockEventKind'>
+    
+
+
+/**
+ * Reference to a field of type 'StockEventKind[]'
+ */
+export type ListEnumStockEventKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StockEventKind[]'>
     
 
 
@@ -1697,6 +1801,7 @@ export type GlobalOmitConfig = {
   inventoryItem?: Prisma.InventoryItemOmit
   shoppingList?: Prisma.ShoppingListOmit
   shoppingListItem?: Prisma.ShoppingListItemOmit
+  stockEvent?: Prisma.StockEventOmit
 }
 
 /* Types for Logging */
