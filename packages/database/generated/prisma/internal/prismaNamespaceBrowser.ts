@@ -61,7 +61,8 @@ export const ModelName = {
   Product: 'Product',
   InventoryItem: 'InventoryItem',
   ShoppingList: 'ShoppingList',
-  ShoppingListItem: 'ShoppingListItem'
+  ShoppingListItem: 'ShoppingListItem',
+  StockEvent: 'StockEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -134,6 +135,7 @@ export type VerificationTokenScalarFieldEnum = (typeof VerificationTokenScalarFi
 export const HouseholdScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  alertWindowDays: 'alertWindowDays',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -168,6 +170,7 @@ export const ProductScalarFieldEnum = {
   name: 'name',
   brand: 'brand',
   unit: 'unit',
+  minStockLevel: 'minStockLevel',
   categoryId: 'categoryId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -213,6 +216,19 @@ export const ShoppingListItemScalarFieldEnum = {
 } as const
 
 export type ShoppingListItemScalarFieldEnum = (typeof ShoppingListItemScalarFieldEnum)[keyof typeof ShoppingListItemScalarFieldEnum]
+
+
+export const StockEventScalarFieldEnum = {
+  id: 'id',
+  householdId: 'householdId',
+  productId: 'productId',
+  kind: 'kind',
+  quantity: 'quantity',
+  note: 'note',
+  createdAt: 'createdAt'
+} as const
+
+export type StockEventScalarFieldEnum = (typeof StockEventScalarFieldEnum)[keyof typeof StockEventScalarFieldEnum]
 
 
 export const SortOrder = {

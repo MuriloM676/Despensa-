@@ -10,6 +10,7 @@ const links = [
   { href: "/products", label: "Produtos" },
   { href: "/inventory", label: "Estoque" },
   { href: "/shopping-lists", label: "Listas" },
+  { href: "/history", label: "Histórico" },
 ];
 
 export function AppShell({

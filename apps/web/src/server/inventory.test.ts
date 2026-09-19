@@ -12,6 +12,9 @@ vi.mock("@despensa/database", () => ({
     product: {
       findFirst: vi.fn(),
     },
+    stockEvent: {
+      create: vi.fn(),
+    },
     $executeRaw: vi.fn(),
     $transaction: vi.fn(),
   },
@@ -170,6 +173,25 @@ describe("consumeInventory", () => {
       throw new Error("expected lock and read to be recorded");
     }
     expect(rawOrder).toBeLessThan(findOrder);
+  });
+
+  it("records one CONSUME event with the aggregate quantity (BR-004)", async () => {
+    mockStock([
+      stockEntry("a", 2, "2026-08-10"),
+      stockEntry("b", 2, "2026-08-20"),
+    ]);
+
+    await consumeInventory("household-1", { productId: "product-1", quantity: 3 });
+
+    expect(prisma.stockEvent.create).toHaveBeenCalledTimes(1);
+    expect(prisma.stockEvent.create).toHaveBeenCalledWith({
+      data: {
+        householdId: "household-1",
+        productId: "product-1",
+        kind: "CONSUME",
+        quantity: 3,
+      },
+    });
   });
 });
 

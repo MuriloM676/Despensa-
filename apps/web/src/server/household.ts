@@ -30,3 +30,10 @@ export async function requireHousehold(userId: string) {
   const household = await getOrCreateHouseholdForUser(userId);
   return household;
 }
+
+export async function updateAlertWindowDays(householdId: string, alertWindowDays: number) {
+  return prisma.household.update({
+    where: { id: householdId },
+    data: { alertWindowDays },
+  });
+}

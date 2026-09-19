@@ -72,3 +72,8 @@ export type ShoppingList = Prisma.ShoppingListModel
  * 
  */
 export type ShoppingListItem = Prisma.ShoppingListItemModel
+/**
+ * Model StockEvent
+ * 
+ */
+export type StockEvent = Prisma.StockEventModel

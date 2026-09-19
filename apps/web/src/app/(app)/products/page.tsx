@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { requireUser } from "@/server/session";
 import { requireHousehold } from "@/server/household";
 import { countInventoryEntries, listCategories, listProducts } from "@/server/product";
+import { getStockTotals, findLowStock } from "@/server/stock-alerts";
+import { quantityToNumber, formatQuantity } from "@/lib/quantity";
+import { Badge } from "@despensa/ui";
 import { ProductForm } from "@/components/product-form";
 import { ProductEditForm } from "@/components/product-edit-form";
 import { CategoryForm } from "@/components/category-form";
@@ -27,11 +30,22 @@ function deleteProductMessage(productName: string, entryCount: number): string {
 export default async function ProductsPage() {
   const user = await requireUser();
   const household = await requireHousehold(user.id);
-  const [products, categories, inventoryCounts] = await Promise.all([
+  const [products, categories, inventoryCounts, totals] = await Promise.all([
     listProducts(household.id),
     listCategories(household.id),
     countInventoryEntries(household.id),
+    getStockTotals(household.id),
   ]);
+
+  const lowStockIds = new Set(
+    findLowStock(
+      products.map((product) => ({
+        id: product.id,
+        minStockLevel: quantityToNumber(product.minStockLevel),
+      })),
+      totals,
+    ).map((entry) => entry.productId),
+  );
 
   return (
     <div className="space-y-6">
@@ -88,10 +102,18 @@ export default async function ProductsPage() {
                 <li key={product.id} className="gap-4 py-3">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-sm font-medium text-slate-900">{product.name}</p>
+                      <p className="text-sm font-medium text-slate-900">
+                        {product.name}{" "}
+                        {lowStockIds.has(product.id) ? (
+                          <Badge tone="amber">Estoque baixo</Badge>
+                        ) : null}
+                      </p>
                       <p className="text-xs text-slate-500">
                         {product.brand ?? "Sem marca"} · {product.unit}
                         {product.category ? ` · ${product.category.name}` : ""}
+                        {quantityToNumber(product.minStockLevel) > 0
+                          ? ` · Mín. ${formatQuantity(product.minStockLevel)}`
+                          : ""}
                       </p>
                     </div>
                     <form action={deleteProductAction}>
@@ -117,6 +139,7 @@ export default async function ProductsPage() {
                         name: product.name,
                         brand: product.brand,
                         unit: product.unit,
+                        minStockLevel: quantityToNumber(product.minStockLevel),
                         categoryId: product.categoryId,
                       }}
                       categories={categories}

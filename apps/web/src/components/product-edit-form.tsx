@@ -12,6 +12,7 @@ export interface EditableProduct {
   name: string;
   brand: string | null;
   unit: string;
+  minStockLevel: number;
   categoryId: string | null;
 }
 
@@ -93,6 +94,23 @@ export function ProductEditForm({
           Unidade
         </label>
         <Input id={`unit-${product.id}`} name="unit" type="text" defaultValue={product.unit} />
+      </div>
+
+      <div className="space-y-1">
+        <label
+          htmlFor={`minStockLevel-${product.id}`}
+          className="block text-sm font-medium text-slate-700"
+        >
+          Estoque mínimo
+        </label>
+        <Input
+          id={`minStockLevel-${product.id}`}
+          name="minStockLevel"
+          type="number"
+          min="0"
+          step="0.001"
+          defaultValue={product.minStockLevel}
+        />
       </div>
 
       <Button type="submit" disabled={pending}>

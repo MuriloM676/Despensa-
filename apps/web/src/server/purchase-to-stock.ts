@@ -80,6 +80,7 @@ export async function purchaseToStock(
         brand: "",
         unit: "un",
         categoryId: "",
+        minStockLevel: 0,
       });
       productId = created.id;
       createdProduct = true;

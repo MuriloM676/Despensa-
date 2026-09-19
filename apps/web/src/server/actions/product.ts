@@ -25,6 +25,7 @@ export type CategoryActionState = { error?: string };
 function revalidateProductPages(): void {
   revalidatePath("/products");
   revalidatePath("/inventory");
+  revalidatePath("/dashboard");
 }
 
 export async function createProductAction(
@@ -36,6 +37,7 @@ export async function createProductAction(
     brand: formData.get("brand"),
     unit: formData.get("unit"),
     categoryId: formData.get("categoryId"),
+    minStockLevel: formData.get("minStockLevel"),
   });
 
   if (!parsed.success) {
@@ -65,6 +67,7 @@ export async function updateProductAction(
     brand: formData.get("brand"),
     unit: formData.get("unit"),
     categoryId: formData.get("categoryId"),
+    minStockLevel: formData.get("minStockLevel"),
   });
 
   if (!parsed.success) {

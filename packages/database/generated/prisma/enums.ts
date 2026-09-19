@@ -15,3 +15,12 @@ export const HouseholdRole = {
 } as const
 
 export type HouseholdRole = (typeof HouseholdRole)[keyof typeof HouseholdRole]
+
+
+export const StockEventKind = {
+  PURCHASE: 'PURCHASE',
+  CONSUME: 'CONSUME',
+  REMOVE: 'REMOVE'
+} as const
+
+export type StockEventKind = (typeof StockEventKind)[keyof typeof StockEventKind]
