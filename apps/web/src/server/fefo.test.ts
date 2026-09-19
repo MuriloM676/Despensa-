@@ -61,4 +61,44 @@ describe("planFefoConsumption", () => {
       "Quantity must be greater than zero",
     );
   });
+
+  it("consumes a fractional amount partially (AC-009)", () => {
+    const plan = planFefoConsumption([entry("a", 1.5, null)], 0.5);
+
+    expect(plan).toEqual([{ itemId: "a", amount: 0.5 }]);
+  });
+
+  it("spills fractional consumes across lots in FEFO order (AC-010)", () => {
+    const plan = planFefoConsumption(
+      [
+        entry("a", 0.2, "2026-08-10"),
+        entry("b", 0.2, "2026-08-20"),
+        entry("c", 0.2, null),
+      ],
+      0.5,
+    );
+
+    expect(plan).toEqual([
+      { itemId: "a", amount: 0.2 },
+      { itemId: "b", amount: 0.2 },
+      { itemId: "c", amount: 0.1 },
+    ]);
+  });
+
+  it("zeroes fractional lots exactly, with no float dust", () => {
+    const plan = planFefoConsumption(
+      [
+        entry("a", 0.2, "2026-08-10"),
+        entry("b", 0.2, "2026-08-20"),
+        entry("c", 0.2, null),
+      ],
+      0.6,
+    );
+
+    expect(plan).toEqual([
+      { itemId: "a", amount: 0.2 },
+      { itemId: "b", amount: 0.2 },
+      { itemId: "c", amount: 0.2 },
+    ]);
+  });
 });

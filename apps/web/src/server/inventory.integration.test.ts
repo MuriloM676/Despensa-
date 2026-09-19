@@ -215,6 +215,69 @@ describe("inventory integration (B11, in-memory Prisma)", () => {
     );
   });
 
+  it("consumes a fractional amount partially (AC-009)", async () => {
+    const productId = await seedProduct();
+    await addInventoryItem(HOUSEHOLD, {
+      productId,
+      quantity: 1.5,
+      purchaseDate: undefined,
+      expirationDate: undefined,
+    });
+
+    const plan = await consumeInventory(HOUSEHOLD, { productId, quantity: 0.5 });
+
+    expect(plan).toEqual([{ itemId: expect.any(String), amount: 0.5 }]);
+    const remaining = await stocked();
+    expect(remaining).toHaveLength(1);
+    expect(remaining[0]?.quantity).toBeCloseTo(1, 6);
+  });
+
+  it("consumes fractional lots FEFO and removes zeroed ones (AC-010)", async () => {
+    const productId = await seedProduct();
+    await addInventoryItem(HOUSEHOLD, {
+      productId,
+      quantity: 0.2,
+      purchaseDate: undefined,
+      expirationDate: new Date("2026-08-10T00:00:00"),
+    });
+    await addInventoryItem(HOUSEHOLD, {
+      productId,
+      quantity: 0.2,
+      purchaseDate: undefined,
+      expirationDate: new Date("2026-08-20T00:00:00"),
+    });
+    await addInventoryItem(HOUSEHOLD, {
+      productId,
+      quantity: 0.2,
+      purchaseDate: undefined,
+      expirationDate: undefined,
+    });
+
+    const plan = await consumeInventory(HOUSEHOLD, { productId, quantity: 0.5 });
+
+    expect(plan.map((step) => step.amount)).toEqual([0.2, 0.2, 0.1]);
+    const remaining = await stocked();
+    expect(remaining).toHaveLength(1);
+    expect(remaining[0]?.expirationDate).toBeNull();
+    expect(remaining[0]?.quantity).toBeCloseTo(0.1, 6);
+    expect(getTestDb().inventory.size).toBe(1);
+  });
+
+  it("deletes a fully-consumed fractional line (B2 with decimals)", async () => {
+    const productId = await seedProduct();
+    await addInventoryItem(HOUSEHOLD, {
+      productId,
+      quantity: 0.5,
+      purchaseDate: undefined,
+      expirationDate: undefined,
+    });
+
+    await consumeInventory(HOUSEHOLD, { productId, quantity: 0.5 });
+
+    expect(await listInventory(HOUSEHOLD)).toHaveLength(0);
+    expect(getTestDb().inventory.size).toBe(0);
+  });
+
   it("serializes concurrent consumes so stock never goes negative (AC-008, B9)", async () => {
     const productId = await seedProduct();
     await addInventoryItem(HOUSEHOLD, {

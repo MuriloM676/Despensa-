@@ -4,6 +4,7 @@ import { requireUser } from "@/server/session";
 import { requireHousehold } from "@/server/household";
 import { listInventory, countStockedProducts } from "@/server/inventory";
 import { getExpirationStatus } from "@/server/expiration";
+import { formatQuantity } from "@/lib/quantity";
 import { ExpirationStatus } from "@despensa/types";
 import { Badge } from "@despensa/ui";
 
@@ -80,7 +81,7 @@ export default async function DashboardPage() {
                 <div>
                   <p className="text-sm font-medium text-slate-900">{item.product.name}</p>
                   <p className="text-xs text-slate-500">
-                    {item.quantity} {item.product.unit} · Vence em {formatDate(item.expirationDate)}
+                    {formatQuantity(item.quantity)} {item.product.unit} · Vence em {formatDate(item.expirationDate)}
                   </p>
                 </div>
                 <Badge tone={statusLabel[item.status].tone}>

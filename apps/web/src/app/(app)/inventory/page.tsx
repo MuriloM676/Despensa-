@@ -4,6 +4,7 @@ import { requireHousehold } from "@/server/household";
 import { listInventory } from "@/server/inventory";
 import { listProducts } from "@/server/product";
 import { getExpirationStatus } from "@/server/expiration";
+import { quantityToNumber, formatQuantity } from "@/lib/quantity";
 import { ExpirationStatus } from "@despensa/types";
 import { Badge } from "@despensa/ui";
 import { AddInventoryForm, ConsumeInventoryForm } from "@/components/inventory-forms";
@@ -75,14 +76,14 @@ export default async function InventoryPage() {
           ) : (
             [...grouped.entries()].map(([productId, items]) => {
               const product = items[0]!.product;
-              const total = items.reduce((sum, i) => sum + i.quantity, 0);
+              const total = items.reduce((sum, i) => sum + quantityToNumber(i.quantity), 0);
               return (
                 <div key={productId} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                   <div className="flex items-center justify-between">
                     <h2 className="text-sm font-semibold text-slate-900">
                       {product.name}
                       <span className="ml-2 text-xs font-normal text-slate-500">
-                        {total} {product.unit} no total
+                        {formatQuantity(total)} {product.unit} no total
                       </span>
                     </h2>
                   </div>
@@ -93,7 +94,7 @@ export default async function InventoryPage() {
                         <li key={item.id} className="flex items-center justify-between gap-4 py-3">
                           <div>
                             <p className="text-sm text-slate-700">
-                              {item.quantity} {product.unit}
+                              {formatQuantity(item.quantity)} {product.unit}
                             </p>
                             <p className="text-xs text-slate-500">
                               Comprado em {formatDate(item.purchaseDate)} · Vence {formatDate(item.expirationDate)}

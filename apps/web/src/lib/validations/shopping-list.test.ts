@@ -44,6 +44,27 @@ describe("addShoppingListItemSchema", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("accepts fractional quantities with dot or comma (B12)", () => {
+    for (const quantity of ["0.5", "0,5"]) {
+      const result = addShoppingListItemSchema.safeParse({
+        listId: "l1",
+        quantity,
+        name: "Leite",
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.quantity).toBe(0.5);
+      }
+    }
+  });
+
+  it("rejects more than 3 decimal places (B12)", () => {
+    expect(
+      addShoppingListItemSchema.safeParse({ listId: "l1", quantity: "1,2345", name: "Leite" })
+        .success,
+    ).toBe(false);
+  });
 });
 
 describe("toggleShoppingListItemSchema", () => {

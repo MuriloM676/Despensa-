@@ -27,11 +27,11 @@ export type AggregateShoppingListItem = {
 }
 
 export type ShoppingListItemAvgAggregateOutputType = {
-  quantity: number | null
+  quantity: runtime.Decimal | null
 }
 
 export type ShoppingListItemSumAggregateOutputType = {
-  quantity: number | null
+  quantity: runtime.Decimal | null
 }
 
 export type ShoppingListItemMinAggregateOutputType = {
@@ -39,7 +39,7 @@ export type ShoppingListItemMinAggregateOutputType = {
   listId: string | null
   productId: string | null
   name: string | null
-  quantity: number | null
+  quantity: runtime.Decimal | null
   done: boolean | null
   createdAt: Date | null
 }
@@ -49,7 +49,7 @@ export type ShoppingListItemMaxAggregateOutputType = {
   listId: string | null
   productId: string | null
   name: string | null
-  quantity: number | null
+  quantity: runtime.Decimal | null
   done: boolean | null
   createdAt: Date | null
 }
@@ -196,7 +196,7 @@ export type ShoppingListItemGroupByOutputType = {
   listId: string
   productId: string | null
   name: string | null
-  quantity: number
+  quantity: runtime.Decimal
   done: boolean
   createdAt: Date
   _count: ShoppingListItemCountAggregateOutputType | null
@@ -229,7 +229,7 @@ export type ShoppingListItemWhereInput = {
   listId?: Prisma.StringFilter<"ShoppingListItem"> | string
   productId?: Prisma.StringNullableFilter<"ShoppingListItem"> | string | null
   name?: Prisma.StringNullableFilter<"ShoppingListItem"> | string | null
-  quantity?: Prisma.IntFilter<"ShoppingListItem"> | number
+  quantity?: Prisma.DecimalFilter<"ShoppingListItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: Prisma.BoolFilter<"ShoppingListItem"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ShoppingListItem"> | Date | string
   list?: Prisma.XOR<Prisma.ShoppingListScalarRelationFilter, Prisma.ShoppingListWhereInput>
@@ -256,7 +256,7 @@ export type ShoppingListItemWhereUniqueInput = Prisma.AtLeast<{
   listId?: Prisma.StringFilter<"ShoppingListItem"> | string
   productId?: Prisma.StringNullableFilter<"ShoppingListItem"> | string | null
   name?: Prisma.StringNullableFilter<"ShoppingListItem"> | string | null
-  quantity?: Prisma.IntFilter<"ShoppingListItem"> | number
+  quantity?: Prisma.DecimalFilter<"ShoppingListItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: Prisma.BoolFilter<"ShoppingListItem"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ShoppingListItem"> | Date | string
   list?: Prisma.XOR<Prisma.ShoppingListScalarRelationFilter, Prisma.ShoppingListWhereInput>
@@ -286,7 +286,7 @@ export type ShoppingListItemScalarWhereWithAggregatesInput = {
   listId?: Prisma.StringWithAggregatesFilter<"ShoppingListItem"> | string
   productId?: Prisma.StringNullableWithAggregatesFilter<"ShoppingListItem"> | string | null
   name?: Prisma.StringNullableWithAggregatesFilter<"ShoppingListItem"> | string | null
-  quantity?: Prisma.IntWithAggregatesFilter<"ShoppingListItem"> | number
+  quantity?: Prisma.DecimalWithAggregatesFilter<"ShoppingListItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: Prisma.BoolWithAggregatesFilter<"ShoppingListItem"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ShoppingListItem"> | Date | string
 }
@@ -294,7 +294,7 @@ export type ShoppingListItemScalarWhereWithAggregatesInput = {
 export type ShoppingListItemCreateInput = {
   id?: string
   name?: string | null
-  quantity: number
+  quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: boolean
   createdAt?: Date | string
   list: Prisma.ShoppingListCreateNestedOneWithoutItemsInput
@@ -306,7 +306,7 @@ export type ShoppingListItemUncheckedCreateInput = {
   listId: string
   productId?: string | null
   name?: string | null
-  quantity: number
+  quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: boolean
   createdAt?: Date | string
 }
@@ -314,7 +314,7 @@ export type ShoppingListItemUncheckedCreateInput = {
 export type ShoppingListItemUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   list?: Prisma.ShoppingListUpdateOneRequiredWithoutItemsNestedInput
@@ -326,7 +326,7 @@ export type ShoppingListItemUncheckedUpdateInput = {
   listId?: Prisma.StringFieldUpdateOperationsInput | string
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -336,7 +336,7 @@ export type ShoppingListItemCreateManyInput = {
   listId: string
   productId?: string | null
   name?: string | null
-  quantity: number
+  quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: boolean
   createdAt?: Date | string
 }
@@ -344,7 +344,7 @@ export type ShoppingListItemCreateManyInput = {
 export type ShoppingListItemUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -354,7 +354,7 @@ export type ShoppingListItemUncheckedUpdateManyInput = {
   listId?: Prisma.StringFieldUpdateOperationsInput | string
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -498,7 +498,7 @@ export type BoolFieldUpdateOperationsInput = {
 export type ShoppingListItemCreateWithoutProductInput = {
   id?: string
   name?: string | null
-  quantity: number
+  quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: boolean
   createdAt?: Date | string
   list: Prisma.ShoppingListCreateNestedOneWithoutItemsInput
@@ -508,7 +508,7 @@ export type ShoppingListItemUncheckedCreateWithoutProductInput = {
   id?: string
   listId: string
   name?: string | null
-  quantity: number
+  quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: boolean
   createdAt?: Date | string
 }
@@ -547,7 +547,7 @@ export type ShoppingListItemScalarWhereInput = {
   listId?: Prisma.StringFilter<"ShoppingListItem"> | string
   productId?: Prisma.StringNullableFilter<"ShoppingListItem"> | string | null
   name?: Prisma.StringNullableFilter<"ShoppingListItem"> | string | null
-  quantity?: Prisma.IntFilter<"ShoppingListItem"> | number
+  quantity?: Prisma.DecimalFilter<"ShoppingListItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: Prisma.BoolFilter<"ShoppingListItem"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ShoppingListItem"> | Date | string
 }
@@ -555,7 +555,7 @@ export type ShoppingListItemScalarWhereInput = {
 export type ShoppingListItemCreateWithoutListInput = {
   id?: string
   name?: string | null
-  quantity: number
+  quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: boolean
   createdAt?: Date | string
   product?: Prisma.ProductCreateNestedOneWithoutListItemsInput
@@ -565,7 +565,7 @@ export type ShoppingListItemUncheckedCreateWithoutListInput = {
   id?: string
   productId?: string | null
   name?: string | null
-  quantity: number
+  quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: boolean
   createdAt?: Date | string
 }
@@ -600,7 +600,7 @@ export type ShoppingListItemCreateManyProductInput = {
   id?: string
   listId: string
   name?: string | null
-  quantity: number
+  quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: boolean
   createdAt?: Date | string
 }
@@ -608,7 +608,7 @@ export type ShoppingListItemCreateManyProductInput = {
 export type ShoppingListItemUpdateWithoutProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   list?: Prisma.ShoppingListUpdateOneRequiredWithoutItemsNestedInput
@@ -618,7 +618,7 @@ export type ShoppingListItemUncheckedUpdateWithoutProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   listId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -627,7 +627,7 @@ export type ShoppingListItemUncheckedUpdateManyWithoutProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   listId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -636,7 +636,7 @@ export type ShoppingListItemCreateManyListInput = {
   id?: string
   productId?: string | null
   name?: string | null
-  quantity: number
+  quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: boolean
   createdAt?: Date | string
 }
@@ -644,7 +644,7 @@ export type ShoppingListItemCreateManyListInput = {
 export type ShoppingListItemUpdateWithoutListInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   product?: Prisma.ProductUpdateOneWithoutListItemsNestedInput
@@ -654,7 +654,7 @@ export type ShoppingListItemUncheckedUpdateWithoutListInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -663,7 +663,7 @@ export type ShoppingListItemUncheckedUpdateManyWithoutListInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -741,7 +741,7 @@ export type $ShoppingListItemPayload<ExtArgs extends runtime.Types.Extensions.In
     listId: string
     productId: string | null
     name: string | null
-    quantity: number
+    quantity: runtime.Decimal
     done: boolean
     createdAt: Date
   }, ExtArgs["result"]["shoppingListItem"]>
@@ -1173,7 +1173,7 @@ export interface ShoppingListItemFieldRefs {
   readonly listId: Prisma.FieldRef<"ShoppingListItem", 'String'>
   readonly productId: Prisma.FieldRef<"ShoppingListItem", 'String'>
   readonly name: Prisma.FieldRef<"ShoppingListItem", 'String'>
-  readonly quantity: Prisma.FieldRef<"ShoppingListItem", 'Int'>
+  readonly quantity: Prisma.FieldRef<"ShoppingListItem", 'Decimal'>
   readonly done: Prisma.FieldRef<"ShoppingListItem", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"ShoppingListItem", 'DateTime'>
 }

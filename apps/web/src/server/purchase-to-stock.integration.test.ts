@@ -120,6 +120,30 @@ describe("purchase-to-stock integration (B11, FR-009)", () => {
     expect(entry?.expirationDate?.getTime()).toBe(expected.getTime());
   });
 
+  it("carries a fractional quantity into the stock entry (AC-007)", async () => {
+    const product = await createProduct(HOUSEHOLD, {
+      name: "Farinha",
+      brand: "",
+      unit: "kg",
+      categoryId: "",
+    });
+    const { listId, itemId } = await doneItem({ productId: product.id, quantity: 0.5 });
+
+    const result = await purchaseToStock(HOUSEHOLD, {
+      itemId,
+      listId,
+      expirationDate: undefined,
+    });
+
+    expect(result).toMatchObject({ productId: product.id, createdProduct: false });
+    const stock = (await listInventory(HOUSEHOLD)) as unknown as Array<{
+      productId: string;
+      quantity: number;
+    }>;
+    expect(stock).toHaveLength(1);
+    expect(stock[0]?.quantity).toBeCloseTo(0.5, 6);
+  });
+
   it("rejects pending items (BR-006)", async () => {
     const list = await createShoppingList(HOUSEHOLD, { name: "Feira" });
     const item = await addShoppingListItem(HOUSEHOLD, {
