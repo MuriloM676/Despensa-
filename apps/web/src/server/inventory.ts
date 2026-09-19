@@ -9,6 +9,14 @@ import { planFefoConsumption, InsufficientStockError } from "./fefo";
  */
 const CONSUME_MAX_ATTEMPTS = 3;
 
+/**
+ * Prisma returns `Decimal` objects for `Decimal(10,3)` columns (B12);
+ * the domain works with plain numbers, so convert at the boundary.
+ */
+function quantityToNumber(value: unknown): number {
+  return typeof value === "number" ? value : Number(value);
+}
+
 function isSerializationConflict(error: unknown): boolean {
   if (typeof error === "object" && error !== null && "code" in error) {
     if ((error as { code: unknown }).code === "P2034") {
@@ -76,12 +84,22 @@ export async function consumeInventory(householdId: string, input: ConsumeInvent
             orderBy: { expirationDate: { sort: "asc", nulls: "last" } },
           });
 
-          const plan = planFefoConsumption(entries, input.quantity);
-          const quantityById = new Map(entries.map((entry) => [entry.id, entry.quantity]));
+          // B12: normalize Prisma Decimals to numbers; compare in integer
+          // thousandths so a fully-consumed fractional lot is deleted
+          // (exact) instead of decremented to dust.
+          const normalized = entries.map((entry) => ({
+            id: entry.id,
+            quantity: quantityToNumber(entry.quantity),
+            expirationDate: entry.expirationDate,
+          }));
+          const plan = planFefoConsumption(normalized, input.quantity);
+          const millisById = new Map(
+            normalized.map((entry) => [entry.id, Math.round(entry.quantity * 1000)]),
+          );
 
           await Promise.all(
             plan.map((step) =>
-              quantityById.get(step.itemId) === step.amount
+              millisById.get(step.itemId) === Math.round(step.amount * 1000)
                 ? tx.inventoryItem.delete({ where: { id: step.itemId } })
                 : tx.inventoryItem.update({
                     where: { id: step.itemId },

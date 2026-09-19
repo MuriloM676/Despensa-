@@ -57,7 +57,7 @@ export function ShoppingListItemForm({
         <label htmlFor="quantity" className="block text-sm font-medium text-slate-700">
           Quantidade
         </label>
-        <Input id="quantity" name="quantity" type="number" min={1} defaultValue={1} />
+        <Input id="quantity" name="quantity" type="number" min="0.001" step="0.001" inputMode="decimal" placeholder="Ex.: 0,5" defaultValue={1} />
       </div>
 
       <Button type="submit" disabled={pending}>

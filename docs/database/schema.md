@@ -29,12 +29,13 @@ An item *type* belonging to a household (name, brand, unit, category).
 ### InventoryItem
 
 A concrete *stock entry*: product + household + quantity + purchase date +
-optional expiration date + optional consumption timestamp.
+optional expiration date + optional consumption timestamp. Quantity is
+`Decimal(10,3)` so fractional amounts (e.g. `0,5 kg`) are stored exactly.
 
 ### ShoppingList / ShoppingListItem
 
 Lists of items to buy. An item may be linked to a product or be a free-form
-name.
+name. Item quantity is `Decimal(10,3)` (fractional amounts allowed).
 
 ## Key relationships
 

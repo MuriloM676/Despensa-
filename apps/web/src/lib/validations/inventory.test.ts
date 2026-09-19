@@ -88,6 +88,30 @@ describe("addInventoryItemSchema", () => {
     const result = addInventoryItemSchema.safeParse({ quantity: "1" });
     expect(result.success).toBe(false);
   });
+
+  it("accepts fractional quantities with dot or comma (B12)", () => {
+    for (const quantity of ["0.5", "0,5", "1,25"]) {
+      const result = addInventoryItemSchema.safeParse({
+        productId: "p1",
+        quantity,
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.quantity).toBeCloseTo(Number(quantity.replace(",", ".")), 6);
+      }
+    }
+  });
+
+  it("rejects more than 3 decimal places (B12)", () => {
+    const result = addInventoryItemSchema.safeParse({
+      productId: "p1",
+      quantity: "0,1234",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toBe("Use no máximo 3 casas decimais");
+    }
+  });
 });
 
 describe("consumeInventorySchema", () => {

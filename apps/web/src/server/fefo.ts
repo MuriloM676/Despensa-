@@ -1,3 +1,9 @@
+/**
+ * FEFO consumption planner. Quantities are decimal (up to 3 places, B12), so
+ * planning runs on integer thousandths (`Math.round(q * 1000)`) to avoid
+ * binary floating-point dust (e.g. `0.6 - 0.2 - 0.2 !== 0.2` in floats).
+ * Plan amounts are converted back to 3dp numbers for Prisma `Decimal` writes.
+ */
 export class InsufficientStockError extends Error {
   constructor(available: number, requested: number) {
     super(`Insufficient stock: requested ${requested}, available ${available}`);
@@ -30,19 +36,21 @@ export function planFefoConsumption(
     return a.expirationDate.getTime() - b.expirationDate.getTime();
   });
 
-  const available = sorted.reduce((sum, e) => sum + e.quantity, 0);
-  if (available < quantity) {
-    throw new InsufficientStockError(available, quantity);
+  const toMillis = (q: number): number => Math.round(q * 1000);
+  const requestedMillis = toMillis(quantity);
+  const availableMillis = sorted.reduce((sum, e) => sum + toMillis(e.quantity), 0);
+  if (availableMillis < requestedMillis) {
+    throw new InsufficientStockError(availableMillis / 1000, quantity);
   }
 
   const plan: FefoConsumptionPlan[] = [];
-  let remaining = quantity;
+  let remainingMillis = requestedMillis;
 
   for (const entry of sorted) {
-    if (remaining <= 0) break;
-    const amount = Math.min(entry.quantity, remaining);
-    plan.push({ itemId: entry.id, amount });
-    remaining -= amount;
+    if (remainingMillis <= 0) break;
+    const amountMillis = Math.min(toMillis(entry.quantity), remainingMillis);
+    plan.push({ itemId: entry.id, amount: amountMillis / 1000 });
+    remainingMillis -= amountMillis;
   }
 
   return plan;

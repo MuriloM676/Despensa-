@@ -119,6 +119,25 @@ describe("consumeInventory", () => {
     );
   });
 
+  it("deletes a fractional entry read back as a Prisma Decimal (B12)", async () => {
+    // Real Prisma returns Decimal objects for Decimal(10,3); the service
+    // must still detect a full consume and delete instead of decrementing.
+    const decimalLike = {
+      valueOf: () => 1.5,
+      toString: () => "1.5",
+    };
+    mockStock([{ id: "a", quantity: decimalLike, expirationDate: null } as never]);
+
+    const plan = await consumeInventory("household-1", {
+      productId: "product-1",
+      quantity: 1.5,
+    });
+
+    expect(plan).toEqual([{ itemId: "a", amount: 1.5 }]);
+    expect(prisma.inventoryItem.delete).toHaveBeenCalledWith({ where: { id: "a" } });
+    expect(prisma.inventoryItem.update).not.toHaveBeenCalled();
+  });
+
   it("locks rows before reading inside a serializable transaction (B9)", async () => {
     mockStock([stockEntry("a", 3, "2026-08-10")]);
 

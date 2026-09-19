@@ -42,7 +42,10 @@ following the simple manual flow (human decision option 1, card desp-vision).
 
 **BR-001** A shopping list belongs to exactly one household.
 
-**BR-002** Item quantity must be greater than zero.
+**BR-002** Item quantity must be greater than zero. Quantities are decimal
+(`Decimal(10,3)`): fractional amounts such as `0,5 kg` are accepted, with up
+to 3 decimal places. Input accepts both `.` and `,` as the decimal separator
+(pt-BR).
 
 **BR-003** Item name is required when the item is not linked to a product.
 
@@ -96,6 +99,9 @@ already exists) and one inventory entry is created for it.
 
 **AC-006** Given a pending (not done) item, when the user tries to convert it
 into stock, then the operation is rejected with an error.
+
+**AC-007** Given a done item of quantity `0,5`, when the user converts it into
+stock, then one inventory entry of quantity `0,5` is created.
 
 ## Out of scope (later)
 

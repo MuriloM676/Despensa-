@@ -8,6 +8,7 @@ import { ShoppingListItemForm } from "@/components/shopping-list-item-form";
 import { RenameShoppingListForm } from "@/components/shopping-list-form";
 import { PurchaseToStockForm } from "@/components/purchase-to-stock-form";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
+import { formatQuantity } from "@/lib/quantity";
 import {
   toggleShoppingListItemAction,
   deleteShoppingListItemAction,
@@ -81,7 +82,7 @@ export default async function ShoppingListDetailPage({
                           {item.product?.name ?? item.name}
                         </p>
                         <p className="text-xs text-slate-500">
-                          {item.quantity} {item.product?.unit ?? "un"}
+                          {formatQuantity(item.quantity)} {item.product?.unit ?? "un"}
                         </p>
                       </div>
                     </div>
@@ -130,7 +131,7 @@ export default async function ShoppingListDetailPage({
                         {item.product?.name ?? item.name}
                       </p>
                       <p className="text-xs text-slate-400">
-                        {item.quantity} {item.product?.unit ?? "un"}
+                        {formatQuantity(item.quantity)} {item.product?.unit ?? "un"}
                       </p>
                     </div>
                     <PurchaseToStockForm itemId={item.id} listId={list.id} />

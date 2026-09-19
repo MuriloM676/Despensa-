@@ -88,7 +88,8 @@ export async function purchaseToStock(
 
   const entry = await addInventoryItem(householdId, {
     productId,
-    quantity: item.quantity,
+    // B12: ShoppingListItem.quantity is Decimal at runtime; the domain takes numbers.
+    quantity: typeof item.quantity === "number" ? item.quantity : Number(item.quantity),
     purchaseDate: undefined,
     expirationDate: input.expirationDate,
   });

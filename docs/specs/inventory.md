@@ -48,6 +48,8 @@ This is what enables FEFO consumption.
 their household.
 
 **FR-002** The user must be able to specify the quantity of an inventory item.
+Quantities are decimal: fractional amounts such as `0,5 kg` are accepted, with
+up to 3 decimal places.
 
 **FR-003** The user may specify a purchase date for an inventory item. Defaults
 to the current date.
@@ -69,7 +71,13 @@ or given away).
 ## Business Rules
 
 **BR-001** Quantity must be greater than zero for new items and for
-consumption.
+consumption. Quantities are stored as `Decimal(10,3)`: values are positive,
+multiples of `0.001`, and at most `1_000_000`. Input accepts both `.` and `,`
+as the decimal separator (pt-BR), and values are rounded to 3 places.
+
+**BR-001a** FEFO planning uses exact thousandths arithmetic (integer math on
+`quantity * 1000`) so fractional consumes never leave floating-point dust
+(e.g. consuming `0,6` from three `0,2` lots zeroes them exactly).
 
 **BR-002** Expiration date is optional.
 
@@ -132,6 +140,13 @@ expiration date is consumed last.
 
 **AC-006** Given an item with quantity 2, when the user consumes 2 units, then
 the entry is removed and no longer appears in the inventory.
+
+**AC-009** Given an item with quantity `1,5 kg`, when the user consumes `0,5`,
+then the entry keeps quantity `1` and stays listed.
+
+**AC-010** Given lots of `0,2` (expiring 2026-08-10), `0,2` (2026-08-20) and
+`0,2` (no expiration), when the user consumes `0,5`, then the plan takes `0,2`
++ `0,2` + `0,1` in FEFO order and the fully-consumed lots are removed.
 
 **AC-007** Given products stocked in different units (e.g. 2 kg of rice and 3
 units of milk), when the dashboard is displayed, then the stock summary shows

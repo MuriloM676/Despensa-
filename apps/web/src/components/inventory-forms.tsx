@@ -49,7 +49,7 @@ export function AddInventoryForm({
         <label htmlFor="quantity" className="block text-sm font-medium text-slate-700">
           Quantidade
         </label>
-        <Input id="quantity" name="quantity" type="number" min={1} required />
+        <Input id="quantity" name="quantity" type="number" min="0.001" step="0.001" inputMode="decimal" placeholder="Ex.: 0,5" required />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -115,7 +115,7 @@ export function ConsumeInventoryForm({
         <label htmlFor="quantity" className="block text-sm font-medium text-slate-700">
           Quantidade
         </label>
-        <Input id="quantity" name="quantity" type="number" min={1} required />
+        <Input id="quantity" name="quantity" type="number" min="0.001" step="0.001" inputMode="decimal" placeholder="Ex.: 0,5" required />
       </div>
 
       <Button type="submit" variant="secondary" disabled={pending} className="w-full">
