@@ -13,6 +13,9 @@ updates, on the device of their choice.
 
 - Relies on the expiration engine (MVP 1) and alerts (MVP 2).
 - Requires a background worker / scheduler and Redis-backed queues.
+- MVP 2 deliberately ships dashboard-only alerts (expiration widget, low-stock
+  badges, replenishment suggestions). No push, email, or in-app notification
+  center is built in MVP 2; this spec stays untouched until MVP 3.
 
 ## Functional Requirements (planned)
 
